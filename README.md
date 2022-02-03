@@ -85,7 +85,7 @@ func main() {
     
     r.WithPrefix("/blog", func() {
       r.Get("/post", PostHandler)
-	  })
+    })
     
     log.Fatalln(r.Start(":8000"))
 }
@@ -101,7 +101,7 @@ func main() {
     
     r.WithMiddleware(myMiddleware, func() {
       r.Get("/post", PostHandler)
-	  })
+    })
     
     log.Fatalln(r.Start(":8000"))
 }
@@ -117,7 +117,23 @@ func main() {
     
     r.WithMiddlewareList([]router.Middleware{M1, M2}, func() {
       r.Get("/post", PostHandler)
-	  })
+    })
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+#### Alltogether
+
+```go
+import 	"github.com/golobby/router"
+
+func main() {
+    r := router.New()
+    
+    r.Group("/blog", []router.Middleware{M1, M2}, func() {
+      r.Get("/post", PostHandler)
+    })
     
     log.Fatalln(r.Start(":8000"))
 }
