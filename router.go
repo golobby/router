@@ -51,16 +51,6 @@ func (r Router) Delete(path string, handler Handler) {
 	r.Map("DELETE", path, handler)
 }
 
-// Head maps a HEAD route.
-func (r Router) Head(path string, handler Handler) {
-	r.Map("HEAD", path, handler)
-}
-
-// Options maps a OPTIONS route.
-func (r Router) Options(path string, handler Handler) {
-	r.Map("OPTIONS", path, handler)
-}
-
 // Group creates a group of routes with common attributes.
 // Currently, prefix and middleware attributes are supported.
 func (r Router) Group(prefix string, middleware []Middleware, body func()) {

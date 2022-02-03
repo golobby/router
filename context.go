@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"net/http"
 )
 
@@ -18,17 +19,11 @@ type Context interface {
 	// SetRequest sets the HTTP request.
 	SetRequest(request *http.Request)
 
-	// ResponseWriter return the HTTP response writer.
-	ResponseWriter() http.ResponseWriter
+	// RW return the HTTP response writer.
+	RW() http.ResponseWriter
 
-	// SetResponseWriter sets the HTTP response writer.
-	SetResponseWriter(rw http.ResponseWriter)
-
-	// Write create and send the HTTP response
-	Write(status int, body []byte) error
-
-	// Status sets the HTTP response status
-	Status(status int)
+	// SetRW sets the HTTP response writer.
+	SetRW(rw http.ResponseWriter)
 
 	// Parameters returns route parameters.
 	Parameters() map[string]string
@@ -41,6 +36,15 @@ type Context interface {
 
 	// HasParameter checks if router parameter exists.
 	HasParameter(name string) bool
+
+	// Empty creates and sends an HTTP empty response
+	Empty(status int) error
+
+	// Json creates and sends an HTTP JSON response
+	Json(status int, body interface{}) error
+
+	// Text creates and sends an HTTP text response
+	Text(status int, body string) error
 }
 
 // DefaultContext is the default implementation of Context
@@ -67,22 +71,12 @@ func (d *DefaultContext) SetRequest(request *http.Request) {
 	d.request = request
 }
 
-func (d *DefaultContext) ResponseWriter() http.ResponseWriter {
+func (d *DefaultContext) RW() http.ResponseWriter {
 	return d.rw
 }
 
-func (d *DefaultContext) SetResponseWriter(rw http.ResponseWriter) {
+func (d *DefaultContext) SetRW(rw http.ResponseWriter) {
 	d.rw = rw
-}
-
-func (d *DefaultContext) Write(status int, body []byte) error {
-	d.rw.WriteHeader(status)
-	_, err := d.rw.Write(body)
-	return err
-}
-
-func (d *DefaultContext) Status(status int) {
-	d.rw.WriteHeader(status)
 }
 
 func (d *DefaultContext) Parameters() map[string]string {
@@ -103,4 +97,28 @@ func (d *DefaultContext) Parameter(name string) string {
 func (d *DefaultContext) HasParameter(name string) bool {
 	_, exist := d.parameters[name]
 	return exist
+}
+
+func (d *DefaultContext) Empty(status int) error {
+	d.rw.WriteHeader(status)
+	return nil
+}
+
+func (d *DefaultContext) Json(status int, body interface{}) error {
+	v, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	d.rw.WriteHeader(status)
+	d.rw.Header().Set("Content-Type", "application/json")
+	_, err = d.rw.Write(v)
+	return err
+}
+
+func (d *DefaultContext) Text(status int, body string) error {
+	d.rw.WriteHeader(status)
+	d.rw.Header().Set("Content-Type", "text/plain")
+	_, err := d.rw.Write([]byte(body))
+	return err
 }

@@ -15,20 +15,22 @@ type director struct {
 
 // ServeHTTP serves HTTP requests and uses other modules to handle them.
 func (d *director) ServeHTTP(rw http.ResponseWriter, request *http.Request) {
+	c := &DefaultContext{}
+	c.SetRequest(request)
+	c.SetRW(rw)
+
 	uri, err := url.ParseRequestURI(request.RequestURI)
 	if err != nil {
 		log.Println("router: fail to parse request uri. err=" + err.Error())
+		_ = c.Empty(http.StatusNotFound)
 		return
 	}
-
-	c := &DefaultContext{}
-	c.SetRequest(request)
-	c.SetResponseWriter(rw)
 
 	route, parameters, err := d.repository.find(request.Method, uri.Path)
 	if err != nil {
 		if err = d.notFound(c); err != nil {
 			log.Println("router: 404 handler error=" + err.Error())
+			_ = c.Empty(http.StatusNotFound)
 		}
 		return
 	}
@@ -38,9 +40,11 @@ func (d *director) ServeHTTP(rw http.ResponseWriter, request *http.Request) {
 
 	if err = d.Run(route, c); err != nil {
 		log.Println("router: handler or middleware error=" + err.Error())
+		_ = c.Empty(http.StatusInternalServerError)
 	}
 }
 
+// Run calls the middleware and handler stack.
 func (d *director) Run(route *Route, c Context) error {
 	stack := make([]Handler, len(route.Middleware)+1)
 	stack = append(stack, route.Handler)
@@ -52,6 +56,12 @@ func (d *director) Run(route *Route, c Context) error {
 	return stack[len(stack)-1](c)
 }
 
+// newDirector creates a new instance of director.
 func newDirector(repository *repository) *director {
-	return &director{repository: repository}
+	return &director{
+		repository: repository,
+		notFound: func(c Context) error {
+			return c.Text(http.StatusNotFound, "404 Not Found.")
+		},
+	}
 }
