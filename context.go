@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"net/http"
 )
 
@@ -37,14 +38,29 @@ type Context interface {
 	// HasParameter checks if router parameter exists.
 	HasParameter(name string) bool
 
+	// Status sets the HTTP response status code
+	Status(status int)
+
+	// Header returns the HTTP response header object
+	Header() http.Header
+
 	// Empty creates and sends an HTTP empty response
 	Empty(status int) error
+
+	// Text creates and sends an HTTP text response
+	Text(status int, body string) error
 
 	// Json creates and sends an HTTP JSON response
 	Json(status int, body interface{}) error
 
-	// Text creates and sends an HTTP text response
-	Text(status int, body string) error
+	// JsonPretty creates and sends an HTTP JSON (with indents) response
+	JsonPretty(status int, body interface{}) error
+
+	// Xml creates and sends an HTTP XML response
+	Xml(status int, body interface{}) error
+
+	// XmlPretty creates and sends an HTTP XML (with indents) response
+	XmlPretty(status int, body interface{}) error
 }
 
 // DefaultContext is the default implementation of Context
@@ -99,26 +115,62 @@ func (d *DefaultContext) HasParameter(name string) bool {
 	return exist
 }
 
-func (d *DefaultContext) Empty(status int) error {
+func (d *DefaultContext) Status(status int) {
 	d.rw.WriteHeader(status)
+}
+
+func (d *DefaultContext) Header() http.Header {
+	return d.rw.Header()
+}
+
+func (d *DefaultContext) Empty(status int) error {
+	d.Status(status)
 	return nil
 }
 
-func (d *DefaultContext) Json(status int, body interface{}) error {
-	v, err := json.Marshal(body)
-	if err != nil {
-		return err
-	}
-
-	d.rw.WriteHeader(status)
-	d.rw.Header().Set("Content-Type", "application/json")
-	_, err = d.rw.Write(v)
+func (d *DefaultContext) Bytes(status int, body []byte) error {
+	d.Status(status)
+	_, err := d.rw.Write(body)
 	return err
 }
 
 func (d *DefaultContext) Text(status int, body string) error {
-	d.rw.WriteHeader(status)
 	d.rw.Header().Set("Content-Type", "text/plain")
-	_, err := d.rw.Write([]byte(body))
-	return err
+	return d.Bytes(status, []byte(body))
+}
+
+func (d *DefaultContext) Json(status int, body interface{}) error {
+	d.rw.Header().Set("Content-Type", "application/json")
+	bytes, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	return d.Bytes(status, bytes)
+}
+
+func (d *DefaultContext) JsonPretty(status int, body interface{}) error {
+	d.rw.Header().Set("Content-Type", "application/json")
+	bytes, err := json.MarshalIndent(body, "", "  ")
+	if err != nil {
+		return err
+	}
+	return d.Bytes(status, bytes)
+}
+
+func (d *DefaultContext) Xml(status int, body interface{}) error {
+	d.rw.Header().Set("Content-Type", "application/xml")
+	bytes, err := xml.MarshalIndent(body, "", "")
+	if err != nil {
+		return err
+	}
+	return d.Bytes(status, bytes)
+}
+
+func (d *DefaultContext) XmlPretty(status int, body interface{}) error {
+	d.rw.Header().Set("Content-Type", "application/xml")
+	bytes, err := xml.MarshalIndent(body, "", "  ")
+	if err != nil {
+		return err
+	}
+	return d.Bytes(status, bytes)
 }
