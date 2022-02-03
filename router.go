@@ -82,6 +82,10 @@ func (r Router) WithMiddlewareList(middleware []Middleware, body func()) {
 	r.repository.addGroup("", middleware, body)
 }
 
+func (r Router) SetNotFoundHandler(handler Handler) {
+	r.director.notFound = handler
+}
+
 // Start runs the HTTP listener and waits for HTTP requests.
 // It should be called after definitions of routes.
 func (r Router) Start(address string) error {
