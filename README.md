@@ -22,8 +22,7 @@ func main() {
     r := router.New()
     
     r.Get("/", func(c router.Context) error {
-      _, err := c.ResponseWriter().Write([]byte("Hello World!"))
-      return err
+        return c.Write(http.StatusOK, []byte("Hello World!"))
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -64,9 +63,7 @@ func main() {
     r.Get("/posts/{pid}/comments/{cid}", func(c router.Context) error {
       postId := c.Parameter("pid")
       commentId := c.Parameter("cid")
-      
-      _, err := c.ResponseWriter().Write([]byte("Hello Comment!"))
-      return err
+      return c.Write([]byte("Hello Comment!"))
     })
     
     log.Fatalln(r.Start(":8000"))
