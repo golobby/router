@@ -1,6 +1,10 @@
 # Router
 A lightweight yet powerful HTTP router for Go projects.
-It's built on top of the built-in Golang HTTP library and added real-world requirements to it.
+It's built on top of the built-in Golang HTTP package and provides the following features:
+* HTTP routing based on HTTP method and URI (path)
+* Route parameters (and parameter regular expression patterns)
+* Middleware
+* HTTP Responses like JSON, XML, Text, Empty and so on
 
 ## Documentation
 ### Required Go Version
@@ -22,7 +26,7 @@ func main() {
     r := router.New()
     
     r.Get("/", func(c router.Context) error {
-        return c.Write(http.StatusOK, []byte("Hello World!"))
+        return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
     
     log.Fatalln(r.Start(":8000"))
