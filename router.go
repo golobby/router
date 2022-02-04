@@ -73,7 +73,7 @@ func (r Router) WithMiddlewareList(middleware []Middleware, body func()) {
 }
 
 func (r Router) SetNotFoundHandler(handler Handler) {
-	r.director.notFound = handler
+	r.director.notFoundHandler = handler
 }
 
 // Start runs the HTTP listener and waits for HTTP requests.

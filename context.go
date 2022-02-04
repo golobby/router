@@ -20,11 +20,11 @@ type Context interface {
 	// SetRequest sets the HTTP request.
 	SetRequest(request *http.Request)
 
-	// RW return the HTTP response writer.
-	RW() http.ResponseWriter
+	// Response return the HTTP response writer.
+	Response() http.ResponseWriter
 
-	// SetRW sets the HTTP response writer.
-	SetRW(rw http.ResponseWriter)
+	// SetResponse sets the HTTP response writer.
+	SetResponse(rw http.ResponseWriter)
 
 	// Parameters returns route parameters.
 	Parameters() map[string]string
@@ -41,14 +41,14 @@ type Context interface {
 	// Status sets the HTTP response status code
 	Status(status int)
 
-	// Header returns the HTTP response header object
-	Header() http.Header
-
 	// Empty creates and sends an HTTP empty response
 	Empty(status int) error
 
 	// Text creates and sends an HTTP text response
 	Text(status int, body string) error
+
+	// Html creates and sends an HTTP HTML response
+	Html(status int, body string) error
 
 	// Json creates and sends an HTTP JSON response
 	Json(status int, body interface{}) error
@@ -87,11 +87,11 @@ func (d *DefaultContext) SetRequest(request *http.Request) {
 	d.request = request
 }
 
-func (d *DefaultContext) RW() http.ResponseWriter {
+func (d *DefaultContext) Response() http.ResponseWriter {
 	return d.rw
 }
 
-func (d *DefaultContext) SetRW(rw http.ResponseWriter) {
+func (d *DefaultContext) SetResponse(rw http.ResponseWriter) {
 	d.rw = rw
 }
 
@@ -119,10 +119,6 @@ func (d *DefaultContext) Status(status int) {
 	d.rw.WriteHeader(status)
 }
 
-func (d *DefaultContext) Header() http.Header {
-	return d.rw.Header()
-}
-
 func (d *DefaultContext) Empty(status int) error {
 	d.Status(status)
 	return nil
@@ -135,12 +131,17 @@ func (d *DefaultContext) Bytes(status int, body []byte) error {
 }
 
 func (d *DefaultContext) Text(status int, body string) error {
-	d.rw.Header().Set("Content-Type", "text/plain")
+	d.Response().Header().Set("Content-Type", "text/plain")
+	return d.Bytes(status, []byte(body))
+}
+
+func (d *DefaultContext) Html(status int, body string) error {
+	d.Response().Header().Set("Content-Type", "text/html")
 	return d.Bytes(status, []byte(body))
 }
 
 func (d *DefaultContext) Json(status int, body interface{}) error {
-	d.rw.Header().Set("Content-Type", "application/json")
+	d.Response().Header().Set("Content-Type", "application/json")
 	bytes, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -149,7 +150,7 @@ func (d *DefaultContext) Json(status int, body interface{}) error {
 }
 
 func (d *DefaultContext) JsonPretty(status int, body interface{}) error {
-	d.rw.Header().Set("Content-Type", "application/json")
+	d.Response().Header().Set("Content-Type", "application/json")
 	bytes, err := json.MarshalIndent(body, "", "  ")
 	if err != nil {
 		return err
@@ -158,7 +159,7 @@ func (d *DefaultContext) JsonPretty(status int, body interface{}) error {
 }
 
 func (d *DefaultContext) Xml(status int, body interface{}) error {
-	d.rw.Header().Set("Content-Type", "application/xml")
+	d.Response().Header().Set("Content-Type", "application/xml")
 	bytes, err := xml.MarshalIndent(body, "", "")
 	if err != nil {
 		return err
@@ -167,7 +168,7 @@ func (d *DefaultContext) Xml(status int, body interface{}) error {
 }
 
 func (d *DefaultContext) XmlPretty(status int, body interface{}) error {
-	d.rw.Header().Set("Content-Type", "application/xml")
+	d.Response().Header().Set("Content-Type", "application/xml")
 	bytes, err := xml.MarshalIndent(body, "", "  ")
 	if err != nil {
 		return err

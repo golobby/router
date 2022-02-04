@@ -16,6 +16,10 @@ func main() {
 		return c.Text(200, "It's a text response")
 	})
 
+	r.Get("/html", func(c router.Context) error {
+		return c.Html(200, "<h1>HTML</h1><p>This is paragraph</p>")
+	})
+
 	r.Get("/json", func(c router.Context) error {
 		s := struct {
 			Message string `json:"message"`
@@ -36,8 +40,8 @@ func main() {
 		return c.Xml(200, []int{1, 2, 3})
 	})
 
-	r.Get("/xml", func(c router.Context) error {
-		return c.Xml(200, []int{1, 2, 3})
+	r.Get("/xml-pretty", func(c router.Context) error {
+		return c.XmlPretty(200, []int{1, 2, 3})
 	})
 
 	log.Fatalln(r.Start(":8000"))
