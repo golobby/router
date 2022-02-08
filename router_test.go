@@ -1,6 +1,7 @@
 package router_test
 
 import (
+	"errors"
 	"github.com/golobby/router"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -219,7 +220,7 @@ func TestRouter_With_Middlewares(t *testing.T) {
 	assert.Equal(t, "Middleware1 Middleware2", rw.stringBody())
 }
 
-func TestRouter_With_Not_Found_Handler(t *testing.T) {
+func TestRouter_With_Errors(t *testing.T) {
 	r := router.New()
 	r.SetNotFoundHandler(func(c router.Context) error {
 		return c.Text(504, "New Not Found")
@@ -227,6 +228,10 @@ func TestRouter_With_Not_Found_Handler(t *testing.T) {
 
 	r.GET("/%", func(c router.Context) error {
 		return c.Text(200, "OK")
+	})
+
+	r.GET("/error", func(c router.Context) error {
+		return errors.New("error")
 	})
 
 	rw := newResponse()
@@ -238,6 +243,11 @@ func TestRouter_With_Not_Found_Handler(t *testing.T) {
 	r.Serve(rw, newRequest("GET", "/%"))
 	assert.Equal(t, 504, rw.status)
 	assert.Equal(t, "New Not Found", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/error"))
+	assert.Equal(t, 500, rw.status)
+	assert.Equal(t, "500 Internal Error", rw.stringBody())
 }
 
 func TestRouter_Start(t *testing.T) {
