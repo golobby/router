@@ -87,15 +87,16 @@ func (r Router) SetNotFoundHandler(handler Handler) {
 	r.director.notFoundHandler = handler
 }
 
-func (r Router) Director() *director {
-	return r.director
-}
-
 // Start runs the HTTP listener and waits for HTTP requests.
 // It should be called after definitions of routes.
 func (r Router) Start(address string) error {
 	log.Println("http router listening to " + address)
 	return http.ListenAndServe(address, r.director)
+}
+
+// Serve handles the request manually with a given request and a response writer.
+func (r Router) Serve(rw http.ResponseWriter, request *http.Request) {
+	r.director.ServeHTTP(rw, request)
 }
 
 // New creates a new instance of the HTTP router.

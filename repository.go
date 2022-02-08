@@ -40,10 +40,19 @@ func (r *repository) pattern(path string) string {
 	parameters := regexp.MustCompile(`{[^}]+}`).FindAllString(path, -1)
 	for _, parameter := range parameters {
 		name := parameter[1 : len(parameter)-1]
+		optional := false
+		if name[len(name)-1:] == "?" {
+			name = name[0 : len(name)-1]
+			optional = true
+		}
 
 		pattern := "(?P<" + name + ">[^/]+?)"
 		if definedPattern, exist := r.parameters[name]; exist {
 			pattern = "(?P<" + name + ">" + definedPattern + ")"
+		}
+
+		if optional {
+			pattern += "?"
 		}
 
 		path = strings.Replace(path, parameter, pattern, -1)

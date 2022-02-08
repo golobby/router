@@ -28,8 +28,16 @@ func (r *responseWriter) Header() http.Header {
 	return r.headers
 }
 
+func (r *responseWriter) String() string {
+	return string(r.body)
+}
+
 func newResponse() *responseWriter {
-	return &responseWriter{headers: http.Header{}}
+	return &responseWriter{
+		status:  0,
+		headers: http.Header{},
+		body:    []byte(""),
+	}
 }
 
 // Testing HTTP request builder
@@ -58,13 +66,95 @@ func TestRouter_With_Different_HTTP_Methods(t *testing.T) {
 	r.OPTIONS("/", handler)
 	r.Map("CUSTOM", "/", handler)
 
-	var rw *responseWriter
 	methods := []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "CUSTOM"}
-
 	for _, m := range methods {
-		rw = newResponse()
-		r.Director().ServeHTTP(rw, newRequest(m, "/"))
+		rw := newResponse()
+		r.Serve(rw, newRequest(m, "/"))
 		assert.Equal(t, 200, rw.status)
-		assert.Equal(t, []byte(m), rw.body)
+		assert.Equal(t, m, rw.String())
 	}
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("FAIL", "/"))
+	assert.Equal(t, 404, rw.status)
+}
+
+func TestRouter_With_Route_Parameters(t *testing.T) {
+	r := router.New()
+	r.Define("id", "[0-9]+")
+
+	r.GET("/{id}", func(c router.Context) error {
+		return c.Text(200, c.Parameter("id"))
+	})
+	r.GET("/{word}/before", func(c router.Context) error {
+		return c.Text(200, c.Parameter("word")+" before")
+	})
+	r.GET("/{word}", func(c router.Context) error {
+		return c.Text(200, c.Parameter("word"))
+	})
+	r.GET("/{word}/after", func(c router.Context) error {
+		return c.Text(200, c.Parameter("word")+" after")
+	})
+	r.GET("/fail/{id}", func(c router.Context) error {
+		return c.Text(200, c.Parameter("id"))
+	})
+	r.GET("/multi/{a}/{b}/{c}", func(c router.Context) error {
+		return c.Text(200, c.Parameter("a")+c.Parameter("b")+c.Parameter("c"))
+	})
+	r.GET("/optional/page/{id?}", func(c router.Context) error {
+		return c.Text(200, c.Parameter("id"))
+	})
+	r.GET("/optional/page2/?{id?}", func(c router.Context) error {
+		return c.Text(200, c.Parameter("id"))
+	})
+
+	var rw *responseWriter
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/13"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "13", rw.String())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/test/before"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "test before", rw.String())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/test"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "test", rw.String())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/test/after"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "test after", rw.String())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/fail/test"))
+	assert.Equal(t, 404, rw.status)
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/multi/1/2/3"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "123", rw.String())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/optional/page/13"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "13", rw.String())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/optional/page/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "", rw.String())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/optional/page"))
+	assert.Equal(t, 404, rw.status)
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/optional/page2"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "", rw.String())
 }
