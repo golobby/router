@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+	"time"
 )
 
 // Testing HTTP response writer
@@ -216,4 +217,35 @@ func TestRouter_With_Middlewares(t *testing.T) {
 	r.Serve(rw, newRequest("GET", "/"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "Middleware1 Middleware2", rw.stringBody())
+}
+
+func TestRouter_With_Not_Found_Handler(t *testing.T) {
+	r := router.New()
+	r.SetNotFoundHandler(func(c router.Context) error {
+		return c.Text(504, "New Not Found")
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 504, rw.status)
+	assert.Equal(t, "New Not Found", rw.stringBody())
+}
+
+func TestRouter_Start(t *testing.T) {
+	r := router.New()
+	r.GET("/", func(c router.Context) error {
+		return c.Text(200, "OK")
+	})
+
+	ec := make(chan error)
+	go func() {
+		ec <- r.Start(":8585")
+	}()
+
+	select {
+	case err := <-ec:
+		assert.Fail(t, err.Error())
+	case <-time.After(3 * time.Second):
+		assert.True(t, true)
+	}
 }
