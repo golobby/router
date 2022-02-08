@@ -225,8 +225,17 @@ func TestRouter_With_Not_Found_Handler(t *testing.T) {
 		return c.Text(504, "New Not Found")
 	})
 
+	r.GET("/%", func(c router.Context) error {
+		return c.Text(200, "OK")
+	})
+
 	rw := newResponse()
 	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 504, rw.status)
+	assert.Equal(t, "New Not Found", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/%"))
 	assert.Equal(t, 504, rw.status)
 	assert.Equal(t, "New Not Found", rw.stringBody())
 }
