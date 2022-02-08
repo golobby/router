@@ -5,6 +5,7 @@ import (
 	"github.com/golobby/router"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -117,13 +118,20 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 		return c.Text(200, c.Parameter("id"))
 	})
 	r.GET("/multi/{a}/{b}/{c}", func(c router.Context) error {
-		return c.Text(200, c.Parameter("a")+c.Parameter("b")+c.Parameter("c"))
+		return c.Text(200, strconv.Itoa(len(c.Parameters())))
 	})
 	r.GET("/optional/page/{id?}", func(c router.Context) error {
 		return c.Text(200, c.Parameter("id"))
 	})
 	r.GET("/optional/page2/?{id?}", func(c router.Context) error {
 		return c.Text(200, c.Parameter("id"))
+	})
+	r.GET("/else/no-parameter", func(c router.Context) error {
+		if c.HasParameter("id") {
+			return c.Text(200, c.Parameter("id"))
+		} else {
+			return c.Text(200, "No Parameter")
+		}
 	})
 
 	var rw *responseWriter
@@ -155,7 +163,7 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/multi/1/2/3"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "123", rw.stringBody())
+	assert.Equal(t, "3", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/optional/page/13"))
@@ -175,6 +183,23 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	r.Serve(rw, newRequest("GET", "/optional/page2"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/else/no-parameter"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "No Parameter", rw.stringBody())
+}
+
+func TestRouter_With_Context_Parameters(t *testing.T) {
+	r := router.New()
+	r.GET("/", func(c router.Context) error {
+		return c.Text(200, c.Route().Method+" "+c.Route().Path)
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "GET /", rw.stringBody())
 }
 
 func TestRouter_With_Prefix(t *testing.T) {
