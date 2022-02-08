@@ -27,6 +27,43 @@ func (r Router) Map(method, path string, handler Handler) {
 	r.repository.addRoute(method, path, handler)
 }
 
+// Group creates a group of routes with common attributes.
+// Currently, prefix and middleware attributes are supported.
+func (r Router) Group(prefix string, middleware []Middleware, body func()) {
+	r.repository.addGroup(prefix, middleware, body)
+}
+
+// WithPrefix creates a group of routes with common prefix.
+func (r Router) WithPrefix(prefix string, body func()) {
+	r.repository.addGroup(prefix, []Middleware{}, body)
+}
+
+// WithMiddleware creates a group of routes with common middleware.
+func (r Router) WithMiddleware(middleware Middleware, body func()) {
+	r.repository.addGroup("", []Middleware{middleware}, body)
+}
+
+// WithMiddlewares creates a group of routes with common set of middleware.
+func (r Router) WithMiddlewares(middleware []Middleware, body func()) {
+	r.repository.addGroup("", middleware, body)
+}
+
+func (r Router) SetNotFoundHandler(handler Handler) {
+	r.director.notFoundHandler = handler
+}
+
+// Start runs the HTTP listener and waits for HTTP requests.
+// It should be called after definitions of routes.
+func (r Router) Start(address string) error {
+	log.Println("http router listening to " + address)
+	return http.ListenAndServe(address, r.director)
+}
+
+// Serve handles the request manually with a given request and a response writer.
+func (r Router) Serve(rw http.ResponseWriter, request *http.Request) {
+	r.director.ServeHTTP(rw, request)
+}
+
 // GET maps a GET route.
 func (r Router) GET(path string, handler Handler) {
 	r.Map("GET", path, handler)
@@ -60,43 +97,6 @@ func (r Router) HEAD(path string, handler Handler) {
 // OPTIONS maps a OPTIONS route.
 func (r Router) OPTIONS(path string, handler Handler) {
 	r.Map("OPTIONS", path, handler)
-}
-
-// Group creates a group of routes with common attributes.
-// Currently, prefix and middleware attributes are supported.
-func (r Router) Group(prefix string, middleware []Middleware, body func()) {
-	r.repository.addGroup(prefix, middleware, body)
-}
-
-// WithPrefix creates a group of routes with common prefix.
-func (r Router) WithPrefix(prefix string, body func()) {
-	r.repository.addGroup(prefix, []Middleware{}, body)
-}
-
-// WithMiddleware creates a group of routes with common middleware.
-func (r Router) WithMiddleware(middleware Middleware, body func()) {
-	r.repository.addGroup("", []Middleware{middleware}, body)
-}
-
-// WithMiddlewareList creates a group of routes with common set of middleware.
-func (r Router) WithMiddlewareList(middleware []Middleware, body func()) {
-	r.repository.addGroup("", middleware, body)
-}
-
-func (r Router) SetNotFoundHandler(handler Handler) {
-	r.director.notFoundHandler = handler
-}
-
-// Start runs the HTTP listener and waits for HTTP requests.
-// It should be called after definitions of routes.
-func (r Router) Start(address string) error {
-	log.Println("http router listening to " + address)
-	return http.ListenAndServe(address, r.director)
-}
-
-// Serve handles the request manually with a given request and a response writer.
-func (r Router) Serve(rw http.ResponseWriter, request *http.Request) {
-	r.director.ServeHTTP(rw, request)
 }
 
 // New creates a new instance of the HTTP router.

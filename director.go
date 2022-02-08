@@ -7,7 +7,7 @@ import (
 )
 
 // director is the base HTTP handler.
-// It receives the request, and the responseWriter responseWriter objects then pass them to the route through the middleware.
+// It receives the request, and the responseWriter objects then pass them to the route through the middleware.
 type director struct {
 	repository      *repository
 	notFoundHandler Handler
