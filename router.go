@@ -79,7 +79,9 @@ func (r Router) SetNotFoundHandler(handler Handler) {
 // Start runs the HTTP listener and waits for HTTP requests.
 // It should be called after definitions of routes.
 func (r Router) Start(address string) error {
-	return http.ListenAndServe(address, r.director)
+	if err := http.ListenAndServe(address, r.director); err != nil {
+		r.director.serveInternalError(nil, err)
+	}
 }
 
 // New creates a new instance of the HTTP router.
