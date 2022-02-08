@@ -15,9 +15,9 @@ func main() {
 
 	r.Define("id", "[0-9]+")
 
-	r.Get("/{id}", MyHandler)
-	r.Get("/{name}", MyHandler)
-	r.Get("/{id}/more/{p2}/{p3}", MyHandler)
+	r.GET("/{id}", MyHandler)
+	r.GET("/{name}", MyHandler)
+	r.GET("/{id}/more/{p2}/{p3}", MyHandler)
 
 	log.Fatalln(r.Start(":8000"))
 }

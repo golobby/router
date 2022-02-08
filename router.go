@@ -27,29 +27,39 @@ func (r Router) Map(method, path string, handler Handler) {
 	r.repository.addRoute(method, path, handler)
 }
 
-// Get maps a GET route.
-func (r Router) Get(path string, handler Handler) {
+// GET maps a GET route.
+func (r Router) GET(path string, handler Handler) {
 	r.Map("GET", path, handler)
 }
 
-// Post maps a POST route.
-func (r Router) Post(path string, handler Handler) {
+// POST maps a POST route.
+func (r Router) POST(path string, handler Handler) {
 	r.Map("POST", path, handler)
 }
 
-// Put maps a PUT route.
-func (r Router) Put(path string, handler Handler) {
+// PUT maps a PUT route.
+func (r Router) PUT(path string, handler Handler) {
 	r.Map("PUT", path, handler)
 }
 
-// Patch maps a PATCH route.
-func (r Router) Patch(path string, handler Handler) {
+// PATCH maps a PATCH route.
+func (r Router) PATCH(path string, handler Handler) {
 	r.Map("PATCH", path, handler)
 }
 
-// Delete maps a DELETE route.
-func (r Router) Delete(path string, handler Handler) {
+// DELETE maps a DELETE route.
+func (r Router) DELETE(path string, handler Handler) {
 	r.Map("DELETE", path, handler)
+}
+
+// HEAD maps a HEAD route.
+func (r Router) HEAD(path string, handler Handler) {
+	r.Map("HEAD", path, handler)
+}
+
+// OPTIONS maps a OPTIONS route.
+func (r Router) OPTIONS(path string, handler Handler) {
+	r.Map("OPTIONS", path, handler)
 }
 
 // Group creates a group of routes with common attributes.
@@ -75,6 +85,10 @@ func (r Router) WithMiddlewareList(middleware []Middleware, body func()) {
 
 func (r Router) SetNotFoundHandler(handler Handler) {
 	r.director.notFoundHandler = handler
+}
+
+func (r Router) Director() *director {
+	return r.director
 }
 
 // Start runs the HTTP listener and waits for HTTP requests.

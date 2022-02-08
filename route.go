@@ -4,7 +4,7 @@ package router
 type Route struct {
 	Method string
 	Path   string
-	Stack  []Handler
+	stack  []Handler
 }
 
 // newRoute creates a new route

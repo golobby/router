@@ -7,7 +7,7 @@ import (
 )
 
 // director is the base HTTP handler.
-// It receives the request, and the response writer objects then pass them to the route through the middleware.
+// It receives the request, and the responseWriter responseWriter objects then pass them to the route through the middleware.
 type director struct {
 	repository      *repository
 	notFoundHandler Handler
@@ -34,7 +34,7 @@ func (d *director) ServeHTTP(rw http.ResponseWriter, request *http.Request) {
 	c.SetRoute(route)
 	c.SetParameters(parameters)
 
-	if err = route.Stack[len(route.Stack)-1](c); err != nil {
+	if err = route.stack[len(route.stack)-1](c); err != nil {
 		d.serveInternalError(c, err)
 	}
 }

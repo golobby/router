@@ -8,19 +8,19 @@ import (
 func main() {
 	r := router.New()
 
-	r.Get("/", func(c router.Context) error {
+	r.GET("/", func(c router.Context) error {
 		return c.Empty(204)
 	})
 
-	r.Get("/text", func(c router.Context) error {
+	r.GET("/text", func(c router.Context) error {
 		return c.Text(200, "It's a text response")
 	})
 
-	r.Get("/html", func(c router.Context) error {
+	r.GET("/html", func(c router.Context) error {
 		return c.Html(200, "<h1>HTML</h1><p>This is paragraph</p>")
 	})
 
-	r.Get("/json", func(c router.Context) error {
+	r.GET("/json", func(c router.Context) error {
 		s := struct {
 			Message string `json:"message"`
 		}{"It's a JSON response!"}
@@ -28,7 +28,7 @@ func main() {
 		return c.Json(200, s)
 	})
 
-	r.Get("/json-pretty", func(c router.Context) error {
+	r.GET("/json-pretty", func(c router.Context) error {
 		s := struct {
 			Message string `json:"message"`
 		}{"It's a JSON response!"}
@@ -36,11 +36,11 @@ func main() {
 		return c.JsonPretty(200, s)
 	})
 
-	r.Get("/xml", func(c router.Context) error {
+	r.GET("/xml", func(c router.Context) error {
 		return c.Xml(200, []int{1, 2, 3})
 	})
 
-	r.Get("/xml-pretty", func(c router.Context) error {
+	r.GET("/xml-pretty", func(c router.Context) error {
 		return c.XmlPretty(200, []int{1, 2, 3})
 	})
 

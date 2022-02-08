@@ -13,11 +13,11 @@ func MyHandler(c router.Context) error {
 func main() {
 	r := router.New()
 
-	r.Get("/", MyHandler)
-	r.Post("/", MyHandler)
-	r.Put("/", MyHandler)
-	r.Patch("/", MyHandler)
-	r.Delete("/", MyHandler)
+	r.GET("/", MyHandler)
+	r.POST("/", MyHandler)
+	r.PUT("/", MyHandler)
+	r.PATCH("/", MyHandler)
+	r.DELETE("/", MyHandler)
 	r.Map("CUSTOM", "/", MyHandler)
 
 	log.Fatalln(r.Start(":8000"))

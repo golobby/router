@@ -31,12 +31,12 @@ func main() {
 	r := router.New()
 
 	r.WithMiddleware(M1, func() {
-		r.Get("/single", func(c router.Context) error {
+		r.GET("/single", func(c router.Context) error {
 			return c.Text(200, "OK")
 		})
 	})
 	r.WithMiddlewareList([]router.Middleware{M1, M2, M3}, func() {
-		r.Get("/multiple", func(c router.Context) error {
+		r.GET("/multiple", func(c router.Context) error {
 			return c.Text(200, "OK")
 		})
 	})

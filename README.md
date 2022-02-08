@@ -1,8 +1,8 @@
-[![GoDoc](https://godoc.org/github.com/golobby/router/?status.svg)](https://godoc.org/github.com/golobby/router/v3)
+[![GoDoc](https://godoc.org/github.com/golobby/router/?status.svg)](https://godoc.org/github.com/golobby/router)
 [![CI](https://github.com/golobby/router/actions/workflows/ci.yml/badge.svg)](https://github.com/golobby/router/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/golobby/router/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/golobby/router/actions/workflows/codeql-analysis.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/golobby/router)](https://goreportcard.com/report/github.com/golobby/router)
-[![Coverage Status](https://coveralls.io/repos/github/golobby/router/badge.svg?v=0)](https://coveralls.io/github/golobby/router?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/golobby/router/badge.svg)](https://coveralls.io/github/golobby/router?branch=master)
 
 # Router
 A lightweight yet powerful HTTP router for Go projects.
