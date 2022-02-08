@@ -128,9 +128,9 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	})
 	r.GET("/else/no-parameter", func(c router.Context) error {
 		if c.HasParameter("id") {
-			return c.Text(200, c.Parameter("id"))
+			return c.Text(200, "Yes and "+c.Parameter("id"))
 		} else {
-			return c.Text(200, "No Parameter")
+			return c.Text(200, "No but "+c.Parameter("id"))
 		}
 	})
 
@@ -187,7 +187,7 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/else/no-parameter"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "No Parameter", rw.stringBody())
+	assert.Equal(t, "No but ", rw.stringBody())
 }
 
 func TestRouter_With_Context_Parameters(t *testing.T) {
