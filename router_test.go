@@ -28,7 +28,7 @@ func (r *responseWriter) Header() http.Header {
 	return r.headers
 }
 
-func (r *responseWriter) String() string {
+func (r *responseWriter) stringBody() string {
 	return string(r.body)
 }
 
@@ -71,7 +71,7 @@ func TestRouter_With_Different_HTTP_Methods(t *testing.T) {
 		rw := newResponse()
 		r.Serve(rw, newRequest(m, "/"))
 		assert.Equal(t, 200, rw.status)
-		assert.Equal(t, m, rw.String())
+		assert.Equal(t, m, rw.stringBody())
 	}
 
 	rw := newResponse()
@@ -113,22 +113,22 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/13"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "13", rw.String())
+	assert.Equal(t, "13", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/test/before"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "test before", rw.String())
+	assert.Equal(t, "test before", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/test"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "test", rw.String())
+	assert.Equal(t, "test", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/test/after"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "test after", rw.String())
+	assert.Equal(t, "test after", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/fail/test"))
@@ -137,17 +137,17 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/multi/1/2/3"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "123", rw.String())
+	assert.Equal(t, "123", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/optional/page/13"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "13", rw.String())
+	assert.Equal(t, "13", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/optional/page/"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "", rw.String())
+	assert.Equal(t, "", rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/optional/page"))
@@ -156,5 +156,19 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/optional/page2"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "", rw.String())
+	assert.Equal(t, "", rw.stringBody())
+}
+
+func TestRouter_With_Prefix(t *testing.T) {
+	r := router.New()
+	r.WithPrefix("/prefix", func() {
+		r.GET("/page", func(c router.Context) error {
+			return c.Text(200, "OK")
+		})
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/prefix/page"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "OK", rw.stringBody())
 }
