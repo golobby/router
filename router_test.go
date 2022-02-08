@@ -49,6 +49,22 @@ func newRequest(method, path string) *http.Request {
 	}
 }
 
+// Testing middlewares
+
+func Middleware1(next router.Handler) router.Handler {
+	return func(c router.Context) error {
+		c.Response().Header().Set("Middleware1", "Middleware1")
+		return next(c)
+	}
+}
+
+func Middleware2(next router.Handler) router.Handler {
+	return func(c router.Context) error {
+		c.Response().Header().Set("Middleware2", "Middleware2")
+		return next(c)
+	}
+}
+
 // Integrated tests
 
 func TestRouter_With_Different_HTTP_Methods(t *testing.T) {
@@ -171,4 +187,33 @@ func TestRouter_With_Prefix(t *testing.T) {
 	r.Serve(rw, newRequest("GET", "/prefix/page"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "OK", rw.stringBody())
+}
+
+func TestRouter_With_Middleware(t *testing.T) {
+	r := router.New()
+	r.WithMiddleware(Middleware1, func() {
+		r.GET("/", func(c router.Context) error {
+			return c.Text(200, c.Response().Header().Get("Middleware1"))
+		})
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "Middleware1", rw.stringBody())
+}
+
+func TestRouter_With_Middlewares(t *testing.T) {
+	r := router.New()
+	r.WithMiddlewares([]router.Middleware{Middleware1, Middleware2}, func() {
+		r.GET("/", func(c router.Context) error {
+			b := c.Response().Header().Get("Middleware1") + " " + c.Response().Header().Get("Middleware2")
+			return c.Text(200, b)
+		})
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "Middleware1 Middleware2", rw.stringBody())
 }
