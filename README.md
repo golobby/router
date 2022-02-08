@@ -25,6 +25,8 @@ go get github.com/golobby/router
 
 ### Quick Start
 
+The following example demonstrates a simple example of using the router.
+
 ```go
 import 	"github.com/golobby/router"
 
@@ -41,8 +43,15 @@ func main() {
 
 ### HTTP Methods
 
+You may use the "Map()" to declare routes for the given HTTP method.
+There are also some methods available for most used HTTP methods ("GET", "POST", "PUT", "PATCH", and "DELETE").
+
 ```go
 import 	"github.com/golobby/router"
+
+func Handler(c router.Context) error {
+    return c.Text(http.StatusOK, "Hello from GoLobby Router!")
+}
 
 func main() {
     r := router.New()
@@ -52,8 +61,6 @@ func main() {
     r.Put("/", Handler)
     r.Patch("/", Handler)
     r.Delete("/", Handler)
-    r.Head("/", Handler)
-    r.Options("/", Handler)
     
     r.Map("GET", "/", Handler)
     r.Map("CUSTOM", "/", Handler)
@@ -64,6 +71,10 @@ func main() {
 
 ### Route Paramters
 
+You can put route parameters inside curly braces like `{id}`.
+To fetch them inside your handler, call the `Parameter()` method of the context.
+You can also get all parameters at once, using the `Parameters()` method.
+
 ```go
 import 	"github.com/golobby/router"
 
@@ -73,6 +84,7 @@ func main() {
     r.Get("/posts/{pid}/comments/{cid}", func(c router.Context) error {
       postId := c.Parameter("pid")
       commentId := c.Parameter("cid")
+      // To get all parameters: c.Parameters()
       return c.Write([]byte("Hello Comment!"))
     })
     
@@ -82,7 +94,12 @@ func main() {
 
 ### Groups
 
+You may put routes with similar attributes into groups.
+Currently, groups support prefix and middleware lists.
+
 #### WithPrefix
+
+You can group routes with common prefixes like the example below.
 
 ```go
 import 	"github.com/golobby/router"
@@ -91,7 +108,8 @@ func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
-      r.Get("/post", PostHandler)
+      r.Get("/posts", PostsIndexHandler)
+      r.Get("/posts/{1}", PostsShowHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -100,14 +118,23 @@ func main() {
 
 #### WithMiddleware
 
+You can group routes with common middleware like the example below.
+
 ```go
 import 	"github.com/golobby/router"
+
+func AdminMiddleware(next router.Handler) router.Handler {
+	return func(c router.Context) error {
+		// Check user roles...
+		return next(c)
+	}
+}
 
 func main() {
     r := router.New()
     
-    r.WithMiddleware(myMiddleware, func() {
-      r.Get("/post", PostHandler)
+    r.WithMiddleware(AdminMiddleware, func() {
+      r.Get("/admin", PostHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -115,6 +142,8 @@ func main() {
 ```
 
 #### WithMiddlewareList
+
+You can also assign multiple middlewares like the following example.
 
 ```go
 import 	"github.com/golobby/router"
@@ -131,6 +160,8 @@ func main() {
 ```
 
 #### Alltogether
+
+You can also create a group with both prefix and middlewares like the following sample.
 
 ```go
 import 	"github.com/golobby/router"
