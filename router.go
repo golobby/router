@@ -35,17 +35,17 @@ func (r Router) Group(prefix string, middleware []Middleware, body func()) {
 
 // WithPrefix creates a group of routes with common prefix.
 func (r Router) WithPrefix(prefix string, body func()) {
-	r.repository.addGroup(prefix, []Middleware{}, body)
+	r.Group(prefix, []Middleware{}, body)
 }
 
 // WithMiddleware creates a group of routes with common middleware.
 func (r Router) WithMiddleware(middleware Middleware, body func()) {
-	r.repository.addGroup("", []Middleware{middleware}, body)
+	r.Group("", []Middleware{middleware}, body)
 }
 
 // WithMiddlewares creates a group of routes with common set of middleware.
 func (r Router) WithMiddlewares(middleware []Middleware, body func()) {
-	r.repository.addGroup("", middleware, body)
+	r.Group("", middleware, body)
 }
 
 func (r Router) SetNotFoundHandler(handler Handler) {
