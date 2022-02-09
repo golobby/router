@@ -54,8 +54,6 @@ There are also some methods available for the most used HTTP methods.
 These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`.
 
 ```go
-import 	"github.com/golobby/router"
-
 func Handler(c router.Context) error {
     return c.Text(http.StatusOK, "Hello from GoLobby Router!")
 }
