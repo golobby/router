@@ -61,11 +61,16 @@ func (r *repository) pattern(path string) string {
 	return path
 }
 
-// addGroup adds a new collector of routes to the repository.
+// addGroup adds a new group of routes to the repository.
 func (r *repository) addGroup(prefix string, middleware []Middleware, body func()) {
 	r.collector.update(r.pattern(prefix), middleware)
 	body()
 	r.collector.rollback()
+}
+
+// updateGroup update the active group without rollback.
+func (r *repository) updateGroup(prefix string, middleware []Middleware) {
+	r.collector.update(r.pattern(prefix), middleware)
 }
 
 // addParameter adds a new route parameter pattern to the repository.

@@ -48,6 +48,21 @@ func (r Router) WithMiddlewares(middleware []Middleware, body func()) {
 	r.Group("", middleware, body)
 }
 
+// AddPrefix adds a global prefix for next routes.
+func (r Router) AddPrefix(prefix string) {
+	r.repository.updateGroup(prefix, []Middleware{})
+}
+
+// AddMiddleware adds a global middleware for next routes.
+func (r Router) AddMiddleware(middleware Middleware) {
+	r.repository.updateGroup("", []Middleware{middleware})
+}
+
+// AddMiddlewares adds global middlewares for next routes.
+func (r Router) AddMiddlewares(middlewares []Middleware) {
+	r.repository.updateGroup("", middlewares)
+}
+
 func (r Router) SetNotFoundHandler(handler Handler) {
 	r.director.notFoundHandler = handler
 }

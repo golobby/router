@@ -206,7 +206,7 @@ func TestRouter_With_Context_Parameters(t *testing.T) {
 	assert.Equal(t, "GET /", rw.stringBody())
 }
 
-func TestRouter_With_Prefix(t *testing.T) {
+func TestRouter_WithPrefix(t *testing.T) {
 	r := router.New()
 	r.WithPrefix("/prefix", func() {
 		r.GET("/page", func(c router.Context) error {
@@ -220,7 +220,20 @@ func TestRouter_With_Prefix(t *testing.T) {
 	assert.Equal(t, "OK", rw.stringBody())
 }
 
-func TestRouter_With_Middleware(t *testing.T) {
+func TestRouter_AddPrefix(t *testing.T) {
+	r := router.New()
+	r.AddPrefix("/prefix")
+	r.GET("/page", func(c router.Context) error {
+		return c.Text(200, "OK")
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/prefix/page"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "OK", rw.stringBody())
+}
+
+func TestRouter_WithMiddleware(t *testing.T) {
 	r := router.New()
 	r.WithMiddleware(Middleware1, func() {
 		r.GET("/", func(c router.Context) error {
@@ -234,7 +247,20 @@ func TestRouter_With_Middleware(t *testing.T) {
 	assert.Equal(t, "Middleware1", rw.stringBody())
 }
 
-func TestRouter_With_Middlewares(t *testing.T) {
+func TestRouter_AddMiddleware(t *testing.T) {
+	r := router.New()
+	r.AddMiddleware(Middleware1)
+	r.GET("/", func(c router.Context) error {
+		return c.Text(200, c.Response().Header().Get("Middleware1"))
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "Middleware1", rw.stringBody())
+}
+
+func TestRouter_WithMiddlewares(t *testing.T) {
 	r := router.New()
 	r.WithMiddlewares([]router.Middleware{Middleware1, Middleware2}, func() {
 		r.GET("/", func(c router.Context) error {
@@ -249,7 +275,21 @@ func TestRouter_With_Middlewares(t *testing.T) {
 	assert.Equal(t, "Middleware1 Middleware2", rw.stringBody())
 }
 
-func TestRouter_With_404_Error(t *testing.T) {
+func TestRouter_AddMiddlewares(t *testing.T) {
+	r := router.New()
+	r.AddMiddlewares([]router.Middleware{Middleware1, Middleware2})
+	r.GET("/", func(c router.Context) error {
+		b := c.Response().Header().Get("Middleware1") + " " + c.Response().Header().Get("Middleware2")
+		return c.Text(200, b)
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "Middleware1 Middleware2", rw.stringBody())
+}
+
+func TestRouter_SetNotFoundHandler(t *testing.T) {
 	r := router.New()
 
 	r.SetNotFoundHandler(func(c router.Context) error {
@@ -271,7 +311,7 @@ func TestRouter_With_404_Error(t *testing.T) {
 	assert.Equal(t, "New Not Found", rw.stringBody())
 }
 
-func TestRouter_With_Internal_Error(t *testing.T) {
+func TestRouter_Internal_Error(t *testing.T) {
 	r := router.New()
 
 	r.SetNotFoundHandler(func(c router.Context) error {
