@@ -323,18 +323,30 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	r.GET("/json", func(c router.Context) error {
 		return c.Json(200, router.S{"message": "JSON"})
 	})
+	r.GET("/json-fail", func(c router.Context) error {
+		return c.Json(200, func() {})
+	})
 	r.GET("/json-pretty", func(c router.Context) error {
 		return c.JsonPretty(200, router.S{"message": "JSON"})
+	})
+	r.GET("/json-pretty-fail", func(c router.Context) error {
+		return c.JsonPretty(200, func() {})
 	})
 	r.GET("/xml", func(c router.Context) error {
 		return c.Xml(200, struct {
 			XMLName struct{} `xml:"User"`
 		}{})
 	})
+	r.GET("/xml-fail", func(c router.Context) error {
+		return c.Xml(200, func() {})
+	})
 	r.GET("/xml-pretty", func(c router.Context) error {
 		return c.XmlPretty(200, struct {
 			XMLName struct{} `xml:"User"`
 		}{})
+	})
+	r.GET("/xml-pretty-fail", func(c router.Context) error {
+		return c.XmlPretty(200, func() {})
 	})
 
 	rw := newResponse()
@@ -362,10 +374,22 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
 
 	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/json-fail"))
+	assert.Equal(t, 500, rw.status)
+	assert.Equal(t, "500 Internal Error", rw.stringBody())
+	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/json-pretty"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "{\n  \"message\": \"JSON\"\n}", rw.stringBody())
 	assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/json-pretty-fail"))
+	assert.Equal(t, 500, rw.status)
+	assert.Equal(t, "500 Internal Error", rw.stringBody())
+	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/xml"))
@@ -374,8 +398,20 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	assert.Equal(t, "application/xml", rw.Header().Get("Content-Type"))
 
 	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/xml-fail"))
+	assert.Equal(t, 500, rw.status)
+	assert.Equal(t, "500 Internal Error", rw.stringBody())
+	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/xml-pretty"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "<User></User>", rw.stringBody())
 	assert.Equal(t, "application/xml", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/xml-pretty-fail"))
+	assert.Equal(t, 500, rw.status)
+	assert.Equal(t, "500 Internal Error", rw.stringBody())
+	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
 }
