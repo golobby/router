@@ -49,7 +49,7 @@ func main() {
 
 ### HTTP Methods
 
-You can use the "Map()" method to declare routes. It gets HTTP methods and paths (URIs).
+You can use the `Map()` method to declare routes. It gets HTTP methods and paths (URIs).
 There are also some methods available for the most used HTTP methods.
 These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`.
 
@@ -78,9 +78,11 @@ func main() {
 
 ### Route Paramters
 
-You can put route parameters inside curly braces like `{id}`.
+You can specify route parameters by putting them inside curly braces like `{id}`.
 To fetch them inside your handler, call the `Parameter()` method of the context.
-You can also get all parameters at once, using the `Parameters()` method.
+It always returns a string and returns an empty string if the parameter does not exist.
+You can also use the `HasParameter()` method to check if the parameter exists or not.
+You may use the `Parameters()` method to get all parameters at once.
 
 ```go
 import 	"github.com/golobby/router"
@@ -89,10 +91,15 @@ func main() {
     r := router.New()
     
     r.Get("/posts/{pid}/comments/{cid}", func(c router.Context) error {
-      postId := c.Parameter("pid")
-      commentId := c.Parameter("cid")
-      // To get all parameters: c.Parameters()
-      return c.Write([]byte("Hello Comment!"))
+      // hasPostId := c.HasParameter("pid")
+      // postId := c.Parameter("pid")
+      
+      // hasCommentId := c.HasParameter("cid")
+      // commentId := c.Parameter("cid")
+      
+      allParameters := c.Parameters()
+      
+      return c.Json(allParameters)
     })
     
     log.Fatalln(r.Start(":8000"))
