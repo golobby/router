@@ -13,9 +13,9 @@ import (
 // Testing HTTP response writer
 
 type responseWriter struct {
-	status  int
-	body    []byte
-	headers http.Header
+	status int
+	body   []byte
+	header http.Header
 }
 
 func (r *responseWriter) WriteHeader(statusCode int) {
@@ -28,7 +28,7 @@ func (r *responseWriter) Write(body []byte) (int, error) {
 }
 
 func (r *responseWriter) Header() http.Header {
-	return r.headers
+	return r.header
 }
 
 func (r *responseWriter) stringBody() string {
@@ -37,9 +37,9 @@ func (r *responseWriter) stringBody() string {
 
 func newResponse() *responseWriter {
 	return &responseWriter{
-		status:  0,
-		headers: http.Header{},
-		body:    []byte(""),
+		status: 0,
+		header: http.Header{},
+		body:   []byte(""),
 	}
 }
 
@@ -307,4 +307,75 @@ func TestRouter_Start(t *testing.T) {
 	case <-time.After(3 * time.Second):
 		assert.True(t, true)
 	}
+}
+
+func TestRouter_With_Different_Responses(t *testing.T) {
+	r := router.New()
+	r.GET("/empty", func(c router.Context) error {
+		return c.Empty(200)
+	})
+	r.GET("/text", func(c router.Context) error {
+		return c.Text(200, "Text")
+	})
+	r.GET("/html", func(c router.Context) error {
+		return c.Html(200, "<p>HTML</p>")
+	})
+	r.GET("/json", func(c router.Context) error {
+		return c.Json(200, router.S{"message": "JSON"})
+	})
+	r.GET("/json-pretty", func(c router.Context) error {
+		return c.JsonPretty(200, router.S{"message": "JSON"})
+	})
+	r.GET("/xml", func(c router.Context) error {
+		return c.Xml(200, struct {
+			XMLName struct{} `xml:"User"`
+		}{})
+	})
+	r.GET("/xml-pretty", func(c router.Context) error {
+		return c.XmlPretty(200, struct {
+			XMLName struct{} `xml:"User"`
+		}{})
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/empty"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "", rw.stringBody())
+	assert.Equal(t, "", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/text"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "Text", rw.stringBody())
+	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/html"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "<p>HTML</p>", rw.stringBody())
+	assert.Equal(t, "text/html", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/json"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "{\"message\":\"JSON\"}", rw.stringBody())
+	assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/json-pretty"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "{\n  \"message\": \"JSON\"\n}", rw.stringBody())
+	assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/xml"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "<User></User>", rw.stringBody())
+	assert.Equal(t, "application/xml", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/xml-pretty"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "<User></User>", rw.stringBody())
+	assert.Equal(t, "application/xml", rw.Header().Get("Content-Type"))
 }
