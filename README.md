@@ -4,20 +4,20 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/golobby/router)](https://goreportcard.com/report/github.com/golobby/router)
 [![Coverage Status](https://coveralls.io/repos/github/golobby/router/badge.svg)](https://coveralls.io/github/golobby/router?branch=master)
 
-# Router
-A lightweight yet powerful HTTP router for Go projects.
-It's built on top of the built-in Golang HTTP package and provides the following features:
-* HTTP routing based on HTTP method and URI (path)
-* Route parameters (and parameter regular expression patterns)
+# GoLobby Router
+GoLobby Router is a lightweight yet powerful HTTP router for Go projects.
+It's built on top of the Golang HTTP package and adds  the following features to it:
+* Routing based on HTTP method and URI
+* Route parameters and parameter patterns
 * Middleware
-* HTTP Responses like JSON, XML, Text, Empty and so on
+* HTTP Responses (such as JSON, XML, Text, Empty, and Redirect)
 
 ## Documentation
 ### Required Go Version
 It requires Go `v1.11` or newer versions.
 
 ### Installation
-To install this package run the following command in the root of your project.
+To install this package, run the following command in your project directory.
 
 ```bash
 go get github.com/golobby/router
@@ -25,15 +25,21 @@ go get github.com/golobby/router
 
 ### Quick Start
 
-The following example demonstrates a simple example of using the router.
+The following example demonstrates a simple example of using the router package.
 
 ```go
-import 	"github.com/golobby/router"
+package main
+
+import (
+	"github.com/golobby/router"
+	"log"
+	"net/http"
+)
 
 func main() {
     r := router.New()
     
-    r.Get("/", func(c router.Context) error {
+    r.GET("/", func(c router.Context) error {
         return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
     
@@ -43,8 +49,9 @@ func main() {
 
 ### HTTP Methods
 
-You may use the "Map()" to declare routes for the given HTTP method.
-There are also some methods available for most used HTTP methods ("GET", "POST", "PUT", "PATCH", and "DELETE").
+You can use the "Map()" method to declare routes. It gets HTTP methods and paths (URIs).
+There are also some methods available for the most used HTTP methods.
+These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`.
 
 ```go
 import 	"github.com/golobby/router"
@@ -56,11 +63,13 @@ func Handler(c router.Context) error {
 func main() {
     r := router.New()
     
-    r.Get("/", Handler)
-    r.Post("/", Handler)
-    r.Put("/", Handler)
-    r.Patch("/", Handler)
-    r.Delete("/", Handler)
+    r.GET("/", Handler)
+    r.POST("/", Handler)
+    r.PUT("/", Handler)
+    r.PATCH("/", Handler)
+    r.DELETE("/", Handler)
+    r.HEAD("/", Handler)
+    r.OPTIONS("/", Handler)
     
     r.Map("GET", "/", Handler)
     r.Map("CUSTOM", "/", Handler)
