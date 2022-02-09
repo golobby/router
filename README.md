@@ -76,30 +76,44 @@ func main() {
 }
 ```
 
-### Route Paramters
+### Route Parameters
 
-You can specify route parameters by putting them inside curly braces like `{id}`.
-To fetch them inside your handler, call the `Parameter()` method of the context.
-It always returns a string and returns an empty string if the parameter does not exist.
-You can also use the `HasParameter()` method to check if the parameter exists or not.
-You may use the `Parameters()` method to get all parameters at once.
+To specify route parameters, put them inside curly braces like `{id}` or `{id?}` where it's optional.
+
+In default, the regular expression pattern for parameters is "`[^/]+`". You can change it using the `Define()` method.
+
+To catch parameters in your handlers, you should use the `Parameters()`, `Parameter()`, and `HasParameter()` methods.
+
 
 ```go
-import 	"github.com/golobby/router"
-
 func main() {
     r := router.New()
     
+    // "id" parameters must be numeric
+    r.Define("id", "[0-9]+")
+   
+    // a required parameter
+    r.Get("/posts/{id}", func(c router.Context) error {
+    	return c.Text(200, c.Parameter("id"))
+    })
+    
+    // multiple required parameters
     r.Get("/posts/{pid}/comments/{cid}", func(c router.Context) error {
-      // hasPostId := c.HasParameter("pid")
-      // postId := c.Parameter("pid")
-      
-      // hasCommentId := c.HasParameter("cid")
-      // commentId := c.Parameter("cid")
-      
-      allParameters := c.Parameters()
-      
-      return c.Json(allParameters)
+    	return c.Json(200, c.Parameters())
+    })
+    
+    // an optional parameter
+    r.Get("/posts/{id?}", func(c router.Context) error {
+    	if c.HasParameter("id") {
+    	    return c.Text(200, c.Parameter("id"))
+	} else {
+	    return c.Text(200, "No Parameter")
+	}
+    })
+    
+    // an optional parameter after an optional slash!
+    r.Get("/posts/?{id?}", func(c router.Context) error {
+   	// It runs for "/posts/1", "/posts/", and "/posts"
     })
     
     log.Fatalln(r.Start(":8000"))
