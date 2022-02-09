@@ -52,6 +52,10 @@ func newRequest(method, path string) *http.Request {
 	}
 }
 
+// Common values
+
+const InternalErrorJson = "{\"message\":\"Internal error.\"}"
+
 // Testing middlewares
 
 func Middleware1(next router.Handler) router.Handler {
@@ -281,12 +285,12 @@ func TestRouter_With_Internal_Error(t *testing.T) {
 	rw := newResponse()
 	r.Serve(rw, newRequest("GET", "/error"))
 	assert.Equal(t, 500, rw.status)
-	assert.Equal(t, "500 Internal Error", rw.stringBody())
+	assert.Equal(t, InternalErrorJson, rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/"))
 	assert.Equal(t, 500, rw.status)
-	assert.Equal(t, "500 Internal Error", rw.stringBody())
+	assert.Equal(t, InternalErrorJson, rw.stringBody())
 
 }
 
@@ -376,8 +380,7 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/json-fail"))
 	assert.Equal(t, 500, rw.status)
-	assert.Equal(t, "500 Internal Error", rw.stringBody())
-	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
+	assert.Equal(t, InternalErrorJson, rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/json-pretty"))
@@ -388,8 +391,7 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/json-pretty-fail"))
 	assert.Equal(t, 500, rw.status)
-	assert.Equal(t, "500 Internal Error", rw.stringBody())
-	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
+	assert.Equal(t, InternalErrorJson, rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/xml"))
@@ -400,8 +402,7 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/xml-fail"))
 	assert.Equal(t, 500, rw.status)
-	assert.Equal(t, "500 Internal Error", rw.stringBody())
-	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
+	assert.Equal(t, InternalErrorJson, rw.stringBody())
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/xml-pretty"))
@@ -412,6 +413,5 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/xml-pretty-fail"))
 	assert.Equal(t, 500, rw.status)
-	assert.Equal(t, "500 Internal Error", rw.stringBody())
-	assert.Equal(t, "text/plain", rw.Header().Get("Content-Type"))
+	assert.Equal(t, InternalErrorJson, rw.stringBody())
 }

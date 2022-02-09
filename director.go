@@ -41,7 +41,7 @@ func (d *director) ServeHTTP(rw http.ResponseWriter, request *http.Request) {
 
 func (d *director) serveInternalError(c Context, err error) {
 	log.Println("router: uncaught error=" + err.Error())
-	_ = c.Text(http.StatusInternalServerError, "500 Internal Error")
+	_ = c.Json(http.StatusInternalServerError, S{"message": "Internal error."})
 }
 
 func (d *director) serveNotFoundError(c Context) {
@@ -56,7 +56,7 @@ func newDirector(repository *repository) *director {
 	return &director{
 		repository: repository,
 		notFoundHandler: func(c Context) error {
-			return c.Text(http.StatusNotFound, "404 Not Found")
+			return c.Json(http.StatusNotFound, S{"message": "Not found."})
 		},
 	}
 }
