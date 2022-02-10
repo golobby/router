@@ -239,12 +239,9 @@ func main() {
 
 ### 404 Handler
 
-In default, the router returns the following HTTP response when a requested URI doesn't match any route.
+In default, the router returns the following HTTP 404 response when a requested URI doesn't match any route.
 
-```http
-HTTP/1.1 404 Not Found
-Content-Type: application/json
-
+```json
 {"message": "Not found."}
 ```
 
@@ -268,12 +265,9 @@ func main() {
 
 Your handlers might return an error while processing the HTTP request.
 This error can be produced by your application logic or failure in the HTTP response.
-By default, the router logs it using Golang's built-in logger into the standard output and returns the HTTP response below.
+By default, the router logs it using Golang's built-in logger into the standard output and returns the HTTP 500 response below.
 
-```http
-HTTP/1.1 500 Internal Error
-Content-Type: application/json
-
+```json
 {"message": "Internal error."}
 ```
 
