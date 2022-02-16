@@ -133,7 +133,7 @@ func main() {
     
     r.WithPrefix("/blog", func() {
       r.Get("/posts", PostsIndexHandler)
-      r.Get("/posts/{1}", PostsShowHandler)
+      r.Get("/posts/{id}", PostsShowHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
