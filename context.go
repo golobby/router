@@ -41,29 +41,32 @@ type Context interface {
 	// Status sets the HTTP responseWriter status code.
 	Status(status int)
 
-	// Empty creates and sends an HTTP empty responseWriter.
+	// Bytes creates and sends a custom HTTP response.
+	Bytes(status int, body []byte) error
+
+	// Empty creates and sends an HTTP empty response.
 	Empty(status int) error
 
-	// Text creates and sends an HTTP text responseWriter.
+	// Text creates and sends an HTTP text response.
 	Text(status int, body string) error
 
-	// Html creates and sends an HTTP HTML responseWriter.
+	// Html creates and sends an HTTP HTML response.
 	Html(status int, body string) error
 
-	// Json creates and sends an HTTP JSON responseWriter.
+	// Json creates and sends an HTTP JSON response.
 	Json(status int, body interface{}) error
 
-	// JsonPretty creates and sends an HTTP JSON (with indents) responseWriter.
+	// JsonPretty creates and sends an HTTP JSON (with indents) response.
 	JsonPretty(status int, body interface{}) error
 
-	// Xml creates and sends an HTTP XML responseWriter.
+	// Xml creates and sends an HTTP XML response.
 	Xml(status int, body interface{}) error
 
-	// XmlPretty creates and sends an HTTP XML (with indents) responseWriter.
+	// XmlPretty creates and sends an HTTP XML (with indents) response.
 	XmlPretty(status int, body interface{}) error
 }
 
-// DefaultContext is the default implementation of Context.
+// DefaultContext is the default implementation of Context interface.
 type DefaultContext struct {
 	route      *Route
 	request    *http.Request
