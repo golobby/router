@@ -91,17 +91,17 @@ func main() {
     r.Define("id", "[0-9]+")
    
     // a required parameter
-    r.Get("/posts/{id}", func(c router.Context) error {
+    r.GET("/posts/{id}", func(c router.Context) error {
     	return c.Text(200, c.Parameter("id"))
     })
     
     // multiple required parameters
-    r.Get("/posts/{pid}/comments/{cid}", func(c router.Context) error {
+    r.GET("/posts/{pid}/comments/{cid}", func(c router.Context) error {
     	return c.Json(200, c.Parameters())
     })
     
     // an optional parameter
-    r.Get("/posts/{id?}", func(c router.Context) error {
+    r.GET("/posts/{id?}", func(c router.Context) error {
     	if c.HasParameter("id") {
     	    return c.Text(200, c.Parameter("id"))
 	} else {
@@ -110,8 +110,62 @@ func main() {
     })
     
     // an optional parameter after an optional slash!
-    r.Get("/posts/?{id?}", func(c router.Context) error {
+    r.GET("/posts/?{id?}", func(c router.Context) error {
    	// It runs for "/posts/1", "/posts/", and "/posts"
+    })
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+### Responses
+
+The router comes with `Empty`, `Redirect`, `Text`, `Html`, `Json`, `JsonPretty`, `Xml`, and `XmlPretty` responses out of the box.
+The examples below demonstrate how to use built-in and custom responses.
+
+```go
+func main() {
+    r := router.New()
+   
+    r.GET("/empty", func(c router.Context) error {
+        return c.Empty(204)
+    })
+    
+    r.GET("/text", func(c router.Context) error {
+        return c.Text(200, "A text response")
+    })
+    
+    r.GET("/html", func(c router.Context) error {
+        return c.Html(200, "<p>A HTML response</p>")
+    })
+   
+    r.GET("/json", func(c router.Context) error {
+        return c.Json(200, User{"id": 13})
+    })
+    
+    r.GET("/json", func(c router.Context) error {
+        return c.Json(200, response.M{"message": "A JSON response using response.M helper"})
+    })
+    
+    r.GET("/json-pretty", func(c router.Context) error {
+        return c.JsonPretty(200, response.M{"message": "A pretty JSON response"})
+    })
+    
+    r.GET("/xml", func(c router.Context) error {
+        return c.Xml(200, User{"id": 13})
+    })
+    
+    r.GET("/xml-pretty", func(c router.Context) error {
+        return c.XmlPretty(200, User{"id": 13})
+    })
+    
+    r.GET("/bytes", func(c router.Context) error {
+        return c.Bytes(200, []bytes("This a custom response"))
+    })
+    
+    r.GET("/custom", func(c router.Context) error {
+        c.Response().Header().Set("Content-Type", "text/csv")
+        return c.Bytes(200, []bytes("Column 1, Column 2, Column 3"))
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -132,8 +186,8 @@ func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
-      r.Get("/posts", PostsIndexHandler)
-      r.Get("/posts/{id}", PostsShowHandler)
+      r.GET("/posts", PostsIndexHandler)
+      r.GET("/posts/{id}", PostsShowHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -156,7 +210,7 @@ func main() {
     r := router.New()
     
     r.WithMiddleware(AdminMiddleware, func() {
-      r.Get("/admin/users", UsersHandler)
+      r.GET("/admin/users", UsersHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -172,7 +226,7 @@ func main() {
     r := router.New()
     
     r.WithMiddlewares([]router.Middleware{Middleware1, Middleware2, Middleware3}, func() {
-        r.Get("/posts", PostsHandler)
+        r.GET("/posts", PostsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -188,7 +242,7 @@ func main() {
     r := router.New()
     
     r.Group("/blog", []router.Middleware{Middleware1, Middleware2}, func() {
-      r.Get("/posts", PostsHandler)
+      r.GET("/posts", PostsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -209,8 +263,8 @@ func main() {
     r := router.New()
     r.AddPrefix("/blog")
 
-    r.Get("/posts", PostsHandler)
-    r.Get("/posts/{id}/comments", CommentsHandler)
+    r.GET("/posts", PostsHandler)
+    r.GET("/posts/{id}/comments", CommentsHandler)
     
     log.Fatalln(r.Start(":8000"))
 }
@@ -230,8 +284,8 @@ func main() {
     // Add multiple middlewares
     r.AddMiddlewares([]router.Middleware{AuthMiddleware, ThrottleMiddleware})
 
-    r.Get("/users", UsersHandler)
-    r.Get("/users/{id}/files", FilesHandler)
+    r.GET("/users", UsersHandler)
+    r.GET("/users/{id}/files", FilesHandler)
     
     log.Fatalln(r.Start(":8000"))
 }
