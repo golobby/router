@@ -2,22 +2,22 @@
 [![CI](https://github.com/golobby/router/actions/workflows/ci.yml/badge.svg)](https://github.com/golobby/router/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/golobby/router/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/golobby/router/actions/workflows/codeql-analysis.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/golobby/router)](https://goreportcard.com/report/github.com/golobby/router)
-[![Coverage Status](https://coveralls.io/repos/github/golobby/router/badge.svg)](https://coveralls.io/github/golobby/router?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/golobby/router/badge.svg?v=dev)](https://coveralls.io/github/golobby/router?branch=master)
 
-# Router
-A lightweight yet powerful HTTP router for Go projects.
-It's built on top of the built-in Golang HTTP package and provides the following features:
-* HTTP routing based on HTTP method and URI (path)
-* Route parameters (and parameter regular expression patterns)
+# GoLobby Router
+GoLobby Router is a lightweight yet powerful HTTP router for Go projects.
+It's built on top of the Golang HTTP package and adds  the following features to it:
+* Routing based on HTTP method and URI
+* Route parameters and parameter patterns
 * Middleware
-* HTTP Responses like JSON, XML, Text, Empty and so on
+* HTTP Responses (such as JSON, XML, Text, Empty, and Redirect)
 
 ## Documentation
 ### Required Go Version
 It requires Go `v1.11` or newer versions.
 
 ### Installation
-To install this package run the following command in the root of your project.
+To install this package, run the following command in your project directory.
 
 ```bash
 go get github.com/golobby/router
@@ -25,15 +25,21 @@ go get github.com/golobby/router
 
 ### Quick Start
 
-The following example demonstrates a simple example of using the router.
+The following example demonstrates a simple example of using the router package.
 
 ```go
-import 	"github.com/golobby/router"
+package main
+
+import (
+	"github.com/golobby/router"
+	"log"
+	"net/http"
+)
 
 func main() {
     r := router.New()
     
-    r.Get("/", func(c router.Context) error {
+    r.GET("/", func(c router.Context) error {
         return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
     
@@ -43,12 +49,11 @@ func main() {
 
 ### HTTP Methods
 
-You may use the "Map()" to declare routes for the given HTTP method.
-There are also some methods available for most used HTTP methods ("GET", "POST", "PUT", "PATCH", and "DELETE").
+You can use the `Map()` method to declare routes. It gets HTTP methods and paths (URIs).
+There are also some methods available for the most used HTTP methods.
+These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`.
 
 ```go
-import 	"github.com/golobby/router"
-
 func Handler(c router.Context) error {
     return c.Text(http.StatusOK, "Hello from GoLobby Router!")
 }
@@ -56,11 +61,13 @@ func Handler(c router.Context) error {
 func main() {
     r := router.New()
     
-    r.Get("/", Handler)
-    r.Post("/", Handler)
-    r.Put("/", Handler)
-    r.Patch("/", Handler)
-    r.Delete("/", Handler)
+    r.GET("/", Handler)
+    r.POST("/", Handler)
+    r.PUT("/", Handler)
+    r.PATCH("/", Handler)
+    r.DELETE("/", Handler)
+    r.HEAD("/", Handler)
+    r.OPTIONS("/", Handler)
     
     r.Map("GET", "/", Handler)
     r.Map("CUSTOM", "/", Handler)
@@ -69,23 +76,42 @@ func main() {
 }
 ```
 
-### Route Paramters
+### Route Parameters
 
-You can put route parameters inside curly braces like `{id}`.
-To fetch them inside your handler, call the `Parameter()` method of the context.
-You can also get all parameters at once, using the `Parameters()` method.
+To specify route parameters, put them inside curly braces like `{id}` or `{id?}` where it's optional.
+In default, the regular expression pattern for parameters is "`[^/]+`".
+You can change it using the `Define()` method.
+To catch and check route parameters in your handlers, you'll have the `Parameters()`, `Parameter()`, and `HasParameter()` methods.
 
 ```go
-import 	"github.com/golobby/router"
-
 func main() {
     r := router.New()
     
+    // "id" parameters must be numeric
+    r.Define("id", "[0-9]+")
+   
+    // a required parameter
+    r.Get("/posts/{id}", func(c router.Context) error {
+    	return c.Text(200, c.Parameter("id"))
+    })
+    
+    // multiple required parameters
     r.Get("/posts/{pid}/comments/{cid}", func(c router.Context) error {
-      postId := c.Parameter("pid")
-      commentId := c.Parameter("cid")
-      // To get all parameters: c.Parameters()
-      return c.Write([]byte("Hello Comment!"))
+    	return c.Json(200, c.Parameters())
+    })
+    
+    // an optional parameter
+    r.Get("/posts/{id?}", func(c router.Context) error {
+    	if c.HasParameter("id") {
+    	    return c.Text(200, c.Parameter("id"))
+	} else {
+	    return c.Text(200, "No Parameter")
+	}
+    })
+    
+    // an optional parameter after an optional slash!
+    r.Get("/posts/?{id?}", func(c router.Context) error {
+   	// It runs for "/posts/1", "/posts/", and "/posts"
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -94,84 +120,177 @@ func main() {
 
 ### Groups
 
-You may put routes with similar attributes into groups.
-Currently, groups support prefix and middleware lists.
+You may put routes with similar attributes in groups.
+Currently, prefix and middleware attributes are supported.
 
-#### WithPrefix
+#### Group by prefix
 
-You can group routes with common prefixes like the example below.
+The example below demonstrates how to group routes with the same prefix.
 
 ```go
-import 	"github.com/golobby/router"
-
 func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
       r.Get("/posts", PostsIndexHandler)
-      r.Get("/posts/{1}", PostsShowHandler)
+      r.Get("/posts/{id}", PostsShowHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
 }
 ```
 
-#### WithMiddleware
+#### Group by middleware
 
-You can group routes with common middleware like the example below.
+The example below demonstrates how to group routes with the same middleware.
 
 ```go
-import 	"github.com/golobby/router"
-
 func AdminMiddleware(next router.Handler) router.Handler {
-	return func(c router.Context) error {
-		// Check user roles...
-		return next(c)
-	}
+    return func(c router.Context) error {
+        // Check user roles...
+        return next(c)
+    }
 }
 
 func main() {
     r := router.New()
     
     r.WithMiddleware(AdminMiddleware, func() {
-      r.Get("/admin", PostHandler)
+      r.Get("/admin/users", UsersHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
 }
 ```
 
-#### WithMiddlewareList
+#### Group by middlewares
 
-You can also assign multiple middlewares like the following example.
+The example below demonstrates how to group routes with the same middlewares.
 
 ```go
-import 	"github.com/golobby/router"
-
 func main() {
     r := router.New()
     
-    r.WithMiddlewareList([]router.Middleware{M1, M2}, func() {
-      r.Get("/post", PostHandler)
+    r.WithMiddlewares([]router.Middleware{Middleware1, Middleware2, Middleware3}, func() {
+        r.Get("/posts", PostsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
 }
 ```
 
-#### Alltogether
+#### Group by multiple attributes
 
-You can also create a group with both prefix and middlewares like the following sample.
+The `group()` method helps you create a group of routes with the same prefix and middlewares.
 
 ```go
-import 	"github.com/golobby/router"
-
 func main() {
     r := router.New()
     
-    r.Group("/blog", []router.Middleware{M1, M2}, func() {
-      r.Get("/post", PostHandler)
+    r.Group("/blog", []router.Middleware{Middleware1, Middleware2}, func() {
+      r.Get("/posts", PostsHandler)
     })
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+### Basic Attributes
+
+Your application might need a base prefix or global middlewares.
+In this case, you can set up these base attributes before defining routes.
+
+#### Base prefix
+
+The following example shows how to set a base prefix for all routes.
+
+```go
+func main() {
+    r := router.New()
+    r.AddPrefix("/blog")
+
+    r.Get("/posts", PostsHandler)
+    r.Get("/posts/{id}/comments", CommentsHandler)
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+#### Base middlewares
+
+The following example shows how to set a base middlewares for all routes.
+
+```go
+func main() {
+    r := router.New()
+    
+    // Add a single middleware
+    r.AddMiddleware(LoggerMiddleware)
+    
+    // Add multiple middlewares
+    r.AddMiddlewares([]router.Middleware{AuthMiddleware, ThrottleMiddleware})
+
+    r.Get("/users", UsersHandler)
+    r.Get("/users/{id}/files", FilesHandler)
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+### 404 Handler
+
+In default, the router returns the following HTTP 404 response when a requested URI doesn't match any route.
+
+```json
+{"message": "Not found."}
+```
+
+You can set your custom handler like the following example.
+
+```go
+func main() {
+    r := router.New()
+    
+    r.SetNotFoundHandler(func(c router.Context) error {
+	return c.Html(404, "<p>404 Not Found</p>")
+    })
+
+    r.GET("/", Handler)
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+### Error Handling
+
+Your handlers might return an error while processing the HTTP request.
+This error can be produced by your application logic or failure in the HTTP response.
+By default, the router logs it using Golang's built-in logger into the standard output and returns the HTTP 500 response below.
+
+```json
+{"message": "Internal error."}
+```
+
+It's a good practice to add a global middleware to catch all these errors, log and handler them the way you need.
+The example below demonstrates how to add middleware for handling errors to the router.
+
+```go
+func main() {
+    r := router.New()
+    
+    // Error Handler
+    r.AddMiddleware(func (next router.Handler) router.Handler {
+        return func(c router.Context) error {
+	    if err := next(c); err != nil {
+	    	myLogger.log(err);
+		retrun c.Html(500, "<p>Something went wrong</p>")
+	    }
+	    
+	    return nil
+        }
+    })
+
+    r.GET("/", Handler)
     
     log.Fatalln(r.Start(":8000"))
 }
