@@ -3,6 +3,7 @@ package router_test
 import (
 	"errors"
 	"github.com/golobby/router"
+	"github.com/golobby/router/pkg/response"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"strconv"
@@ -365,13 +366,13 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 		return c.Html(200, "<p>HTML</p>")
 	})
 	r.GET("/json", func(c router.Context) error {
-		return c.Json(200, router.S{"message": "JSON"})
+		return c.Json(200, response.M{"message": "JSON"})
 	})
 	r.GET("/json-fail", func(c router.Context) error {
 		return c.Json(200, func() {})
 	})
 	r.GET("/json-pretty", func(c router.Context) error {
-		return c.JsonPretty(200, router.S{"message": "JSON"})
+		return c.JsonPretty(200, response.M{"message": "JSON"})
 	})
 	r.GET("/json-pretty-fail", func(c router.Context) error {
 		return c.JsonPretty(200, func() {})

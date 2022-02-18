@@ -111,7 +111,7 @@ func (r *repository) match(path, uri string) (bool, map[string]string) {
 	return false, nil
 }
 
-// newRepository creates a new repository for the new router.
+// newRepository creates a new repository instance.
 func newRepository() *repository {
 	return &repository{
 		parameters: map[string]string{},

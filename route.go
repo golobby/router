@@ -7,7 +7,7 @@ type Route struct {
 	stack  []Handler
 }
 
-// newRoute creates a new route
+// newRoute creates a new route instance.
 func newRoute(method, path string, stack []Handler) *Route {
 	return &Route{method, path, stack}
 }

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// Context holds the HTTP request, the HTTP responseWriter responseWriter, the route, and the route parameters.
+// Context holds the HTTP request, the HTTP responseWriter, the route, and the route parameters.
 type Context interface {
 	// Route returns the dispatched route
 	Route() *Route
@@ -20,10 +20,10 @@ type Context interface {
 	// SetRequest sets the HTTP request.
 	SetRequest(request *http.Request)
 
-	// Response return the HTTP responseWriter responseWriter.
+	// Response return the HTTP responseWriter.
 	Response() http.ResponseWriter
 
-	// SetResponse sets the HTTP responseWriter responseWriter.
+	// SetResponse sets the HTTP responseWriter.
 	SetResponse(rw http.ResponseWriter)
 
 	// Parameters returns route parameters.
@@ -38,32 +38,32 @@ type Context interface {
 	// HasParameter checks if router parameter exists.
 	HasParameter(name string) bool
 
-	// Status sets the HTTP responseWriter status code
+	// Status sets the HTTP responseWriter status code.
 	Status(status int)
 
-	// Empty creates and sends an HTTP empty responseWriter
+	// Empty creates and sends an HTTP empty responseWriter.
 	Empty(status int) error
 
-	// Text creates and sends an HTTP text responseWriter
+	// Text creates and sends an HTTP text responseWriter.
 	Text(status int, body string) error
 
-	// Html creates and sends an HTTP HTML responseWriter
+	// Html creates and sends an HTTP HTML responseWriter.
 	Html(status int, body string) error
 
-	// Json creates and sends an HTTP JSON responseWriter
+	// Json creates and sends an HTTP JSON responseWriter.
 	Json(status int, body interface{}) error
 
-	// JsonPretty creates and sends an HTTP JSON (with indents) responseWriter
+	// JsonPretty creates and sends an HTTP JSON (with indents) responseWriter.
 	JsonPretty(status int, body interface{}) error
 
-	// Xml creates and sends an HTTP XML responseWriter
+	// Xml creates and sends an HTTP XML responseWriter.
 	Xml(status int, body interface{}) error
 
-	// XmlPretty creates and sends an HTTP XML (with indents) responseWriter
+	// XmlPretty creates and sends an HTTP XML (with indents) responseWriter.
 	XmlPretty(status int, body interface{}) error
 }
 
-// DefaultContext is the default implementation of Context
+// DefaultContext is the default implementation of Context.
 type DefaultContext struct {
 	route      *Route
 	request    *http.Request

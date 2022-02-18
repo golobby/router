@@ -29,7 +29,7 @@ func (g *collector) rollback() {
 	g.active.middleware = g.outer.middleware
 }
 
-// newCollector creates a new instance of collector
+// newCollector creates a new collector instance.
 func newCollector() *collector {
 	return &collector{
 		active: &state{

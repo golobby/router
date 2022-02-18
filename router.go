@@ -1,28 +1,27 @@
 // Package router is a lightweight yet powerful HTTP router.
-// It's built on top of the built-in Golang HTTP library and adds real-world requirements to it.
+// It's built on top of the Golang HTTP package and adds routing requirements for modern applications.
 package router
 
 import (
-	"log"
 	"net/http"
 )
 
 // Router is the entry point of the package.
-// It gets routes, route parameter patterns, and middleware then dispatch them.
-// It receives every HTTP request, finds the related route then runs the route handler through its middleware.
+// It gets routes, route parameter patterns, and middleware then dispatches them.
+// It receives HTTP requests, finds the related route then runs the route handler through its middlewares.
 type Router struct {
 	repository *repository
 	director   *director
 }
 
 // Define assigns a regular expression pattern to a route parameter.
-// After the definition, the router only chooses the related route if the request URI matches the pattern.
+// After the definition, the router only dispatches the related route if the request URI matches the pattern.
 func (r Router) Define(parameter, pattern string) {
 	r.repository.addParameter(parameter, pattern)
 }
 
-// Map defines a new route (using HTTP method and path/URI) and assigns a handler.
-// The path may contain route parameters.
+// Map defines a new route by HTTP method and path and assigns a handler.
+// The path (URI) may contain route parameters.
 func (r Router) Map(method, path string, handler Handler) {
 	r.repository.addRoute(method, path, handler)
 }
@@ -43,7 +42,7 @@ func (r Router) WithMiddleware(middleware Middleware, body func()) {
 	r.Group("", []Middleware{middleware}, body)
 }
 
-// WithMiddlewares creates a group of routes with common set of middleware.
+// WithMiddlewares creates a group of routes with common set of middlewares.
 func (r Router) WithMiddlewares(middleware []Middleware, body func()) {
 	r.Group("", middleware, body)
 }
@@ -58,11 +57,13 @@ func (r Router) AddMiddleware(middleware Middleware) {
 	r.repository.updateGroup("", []Middleware{middleware})
 }
 
-// AddMiddlewares adds global middlewares for next routes.
+// AddMiddlewares adds set of global middlewares for next routes.
 func (r Router) AddMiddlewares(middlewares []Middleware) {
 	r.repository.updateGroup("", middlewares)
 }
 
+// SetNotFoundHandler receives a handler and runs it when user request won't lead to any declared route.
+// It is the application 404 error handler, indeed.
 func (r Router) SetNotFoundHandler(handler Handler) {
 	r.director.notFoundHandler = handler
 }
@@ -70,7 +71,6 @@ func (r Router) SetNotFoundHandler(handler Handler) {
 // Start runs the HTTP listener and waits for HTTP requests.
 // It should be called after definitions of routes.
 func (r Router) Start(address string) error {
-	log.Println("http router listening to " + address)
 	return http.ListenAndServe(address, r.director)
 }
 

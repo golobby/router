@@ -1,13 +1,14 @@
 package router
 
 import (
+	"github.com/golobby/router/pkg/response"
 	"log"
 	"net/http"
 	"net/url"
 )
 
 // director is the base HTTP handler.
-// It receives the request, and the responseWriter objects then pass them to the route through the middleware.
+// It receives the request, and the responseWriter objects then pass them to the route through the middlewares.
 type director struct {
 	repository      *repository
 	notFoundHandler Handler
@@ -39,11 +40,13 @@ func (d *director) ServeHTTP(rw http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// serveInternalError handles internal errors.
 func (d *director) serveInternalError(c Context, err error) {
 	log.Println("router: uncaught error=" + err.Error())
-	_ = c.Json(http.StatusInternalServerError, S{"message": "Internal error."})
+	_ = c.Json(http.StatusInternalServerError, response.M{"message": "Internal error."})
 }
 
+// serveNotFoundError handles 404 errors.
 func (d *director) serveNotFoundError(c Context) {
 	err := d.notFoundHandler(c)
 	if err != nil {
@@ -51,12 +54,12 @@ func (d *director) serveNotFoundError(c Context) {
 	}
 }
 
-// newDirector creates a new instance of director.
+// newDirector creates a new director instance.
 func newDirector(repository *repository) *director {
 	return &director{
 		repository: repository,
 		notFoundHandler: func(c Context) error {
-			return c.Json(http.StatusNotFound, S{"message": "Not found."})
+			return c.Json(http.StatusNotFound, response.M{"message": "Not found."})
 		},
 	}
 }
