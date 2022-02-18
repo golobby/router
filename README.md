@@ -131,6 +131,10 @@ func main() {
         return c.Empty(204)
     })
     
+    r.GET("/redirect", func(c router.Context) error {
+        return c.Redirect(301, "https://miladrahimi.com")
+    })
+    
     r.GET("/text", func(c router.Context) error {
         return c.Text(200, "A text response")
     })
