@@ -359,6 +359,9 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	r.GET("/empty", func(c router.Context) error {
 		return c.Empty(200)
 	})
+	r.GET("/redirect", func(c router.Context) error {
+		return c.Redirect(301, "https://miladrahimi.com")
+	})
 	r.GET("/text", func(c router.Context) error {
 		return c.Text(200, "Text")
 	})
@@ -399,6 +402,12 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "", rw.stringBody())
 	assert.Equal(t, "", rw.Header().Get("Content-Type"))
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/redirect"))
+	assert.Equal(t, 301, rw.status)
+	assert.Equal(t, "<a href=\"https://miladrahimi.com\">Moved Permanently</a>.\n\n", rw.stringBody())
+	assert.Equal(t, "https://miladrahimi.com", rw.Header().Get("Location"))
 
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/text"))

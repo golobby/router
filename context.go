@@ -47,6 +47,9 @@ type Context interface {
 	// Empty creates and sends an HTTP empty response.
 	Empty(status int) error
 
+	// Redirect creates and sends an HTTP redirection response.
+	Redirect(status int, url string) error
+
 	// Text creates and sends an HTTP text response.
 	Text(status int, body string) error
 
@@ -122,15 +125,20 @@ func (d *DefaultContext) Status(status int) {
 	d.rw.WriteHeader(status)
 }
 
+func (d *DefaultContext) Bytes(status int, body []byte) error {
+	d.Status(status)
+	_, err := d.rw.Write(body)
+	return err
+}
+
 func (d *DefaultContext) Empty(status int) error {
 	d.Status(status)
 	return nil
 }
 
-func (d *DefaultContext) Bytes(status int, body []byte) error {
-	d.Status(status)
-	_, err := d.rw.Write(body)
-	return err
+func (d *DefaultContext) Redirect(status int, url string) error {
+	http.Redirect(d.Response(), d.Request(), url, status)
+	return nil
 }
 
 func (d *DefaultContext) Text(status int, body string) error {
