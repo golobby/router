@@ -159,6 +159,15 @@ func main() {
         return c.XmlPretty(200, User{"id": 13})
     })
     
+    r.GET("/bytes", func(c router.Context) error {
+        return c.Bytes(200, []bytes("This a custom response"))
+    })
+    
+    r.GET("/custom", func(c router.Context) error {
+        c.Response().Header().Set("Content-Type", "text/csv")
+        return c.Bytes(200, []bytes("Column 1, Column 2, Column 3"))
+    })
+    
     log.Fatalln(r.Start(":8000"))
 }
 ```
