@@ -43,9 +43,9 @@ func main() {
     r.GET("/", func(c router.Context) error {
         return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
-	r.PUT("/products/:id", func(c router.Context) error {
-		return c.Text(http.StatusOK, "Update product with ID: "+c.Parameter("id"))
-	})
+    r.PUT("/products/:id", func(c router.Context) error {
+        return c.Text(http.StatusOK, "Update product with ID: "+c.Parameter("id"))
+    })
     
     log.Fatalln(r.Start(":8000"))
 }
@@ -191,8 +191,8 @@ func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
-		r.GET("/posts", PostsIndexHandler)
-		r.GET("/posts/:id", PostsShowHandler)
+        r.GET("/posts", PostsIndexHandler)
+        r.GET("/posts/:id", PostsShowHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -247,7 +247,7 @@ func main() {
     r := router.New()
     
     r.Group("/blog", []router.Middleware{Middleware1, Middleware2}, func() {
-		r.GET("/posts", PostsHandler)
+        r.GET("/posts", PostsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -311,7 +311,7 @@ func main() {
     r := router.New()
     
     r.SetNotFoundHandler(func(c router.Context) error {
-	    return c.Html(404, "<p>404 Not Found</p>")
+        return c.Html(404, "<p>404 Not Found</p>")
     })
 
     r.GET("/", Handler)
