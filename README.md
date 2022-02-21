@@ -6,7 +6,7 @@
 
 # GoLobby Router
 GoLobby Router is a lightweight yet powerful HTTP router for Go projects.
-It's built on top of the Golang HTTP package and uses radix tree to provide the following features:
+It's built on top of the Go HTTP package and uses radix tree to provide the following features:
 * Routing based on HTTP method and URI
 * Route parameters and parameter patterns
 * Middleware
