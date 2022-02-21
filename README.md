@@ -246,6 +246,7 @@ func main() {
     
     r.WithMiddleware(AdminMiddleware, func() {
         r.GET("/admin/users", UsersHandler)
+	r.GET("/admin/products", ProductsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -294,6 +295,7 @@ func main() {
     
     r.Group("/blog", []router.Middleware{Middleware1, Middleware2}, func() {
         r.GET("/posts", PostsHandler)
+	r.GET("/posts/:id/comments", CommentsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -320,6 +322,8 @@ import (
 
 func main() {
     r := router.New()
+    
+    // Add a prefix to all routes
     r.AddPrefix("/blog")
 
     r.GET("/posts", PostsHandler)
@@ -348,7 +352,7 @@ func main() {
     // Add a single middleware
     r.AddMiddleware(LoggerMiddleware)
     
-    // Add multiple middlewares
+    // Add multiple middlewares at once
     r.AddMiddlewares([]router.Middleware{AuthMiddleware, ThrottleMiddleware})
 
     r.GET("/users", UsersHandler)
@@ -400,8 +404,8 @@ By default, the router logs it using Golang's built-in logger into the standard 
 {"message": "Internal error."}
 ```
 
-It's a good practice to add a global middleware to catch all these errors, log and handler them the way you need.
-The example below demonstrates how to add middleware for handling errors to the router.
+It's a good practice to add a global middleware to catch all these errors, log and handle them the way you need.
+The example below demonstrates how to add middleware for handling errors.
 
 ```go
 package main
@@ -423,6 +427,7 @@ func main() {
                 retrun c.Html(500, "<p>Something went wrong</p>")
             }
             
+	    // No error will raise to the router base handler
             return nil
         }
     })
