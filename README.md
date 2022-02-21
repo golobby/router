@@ -32,9 +32,9 @@ The following example demonstrates a simple example of using the router package.
 package main
 
 import (
-	"github.com/golobby/router"
-	"log"
-	"net/http"
+    "github.com/golobby/router"
+    "log"
+    "net/http"
 )
 
 func main() {
@@ -61,9 +61,9 @@ These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`
 package main
 
 import (
-	"github.com/golobby/router"
-	"log"
-	"net/http"
+    "github.com/golobby/router"
+    "log"
+    "net/http"
 )
 
 func Handler(c router.Context) error {
@@ -95,6 +95,14 @@ In default, parameters could be anything but you can determine a regex pattern u
 To catch and check route parameters in your handlers, you'll have the `Parameters()`, `Parameter()`, and `HasParameter()` methods.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     
@@ -121,6 +129,14 @@ The router comes with `Empty`, `Redirect`, `Text`, `Html`, `Json`, `JsonPretty`,
 The examples below demonstrate how to use built-in and custom responses.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
    
@@ -187,6 +203,14 @@ Currently, prefix and middleware attributes are supported.
 The example below demonstrates how to group routes with the same prefix.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     
@@ -204,6 +228,14 @@ func main() {
 The example below demonstrates how to group routes with the same middleware.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func AdminMiddleware(next router.Handler) router.Handler {
     return func(c router.Context) error {
         // Check user roles...
@@ -227,6 +259,14 @@ func main() {
 The example below demonstrates how to group routes with the same middlewares.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     
@@ -243,6 +283,14 @@ func main() {
 The `group()` method helps you create a group of routes with the same prefix and middlewares.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     
@@ -264,6 +312,14 @@ In this case, you can set up these base attributes before defining routes.
 The following example shows how to set a base prefix for all routes.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     r.AddPrefix("/blog")
@@ -280,6 +336,14 @@ func main() {
 The following example shows how to set a base middlewares for all routes.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     
@@ -307,6 +371,14 @@ In default, the router returns the following HTTP 404 response when a requested 
 You can set your custom handler like the following example.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     
@@ -334,6 +406,14 @@ It's a good practice to add a global middleware to catch all these errors, log a
 The example below demonstrates how to add middleware for handling errors to the router.
 
 ```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
 func main() {
     r := router.New()
     
