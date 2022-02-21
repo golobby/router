@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-// Context holds the HTTP request, the HTTP responseWriter, the route, and the route parameters.
+// Context holds the HTTP request, the HTTP responseWriter, the Route, and the Route parameters.
 type Context interface {
-	// Route returns the dispatched route
+	// Route returns the dispatched Route
 	Route() *Route
 
-	// SetRoute sets the dispatched route
+	// SetRoute sets the dispatched Route
 	SetRoute(route *Route)
 
 	// Request returns the HTTP request.
@@ -26,7 +26,7 @@ type Context interface {
 	// SetResponse sets the HTTP responseWriter.
 	SetResponse(rw http.ResponseWriter)
 
-	// Parameters returns route parameters.
+	// Parameters returns Route parameters.
 	Parameters() map[string]string
 
 	// SetParameters sets the router parameters.

@@ -1,5 +1,6 @@
 // Package router is a lightweight yet powerful HTTP router.
-// It's built on top of the Golang HTTP package and adds routing requirements for modern applications.
+// It's built on top of the Golang HTTP package and uses the radix tree to provide routing requirements for modern
+// applications.
 package router
 
 import (
@@ -7,32 +8,32 @@ import (
 )
 
 // Router is the entry point of the package.
-// It gets routes, route parameter patterns, and middleware then dispatches them.
-// It receives HTTP requests, finds the related route then runs the route handler through its middlewares.
+// It gets routes, Route parameter patterns, and middleware then dispatches them.
+// It receives HTTP requests, finds the related Route then runs the Route handler through its middlewares.
 type Router struct {
 	repository *repository
 	director   *director
 }
 
-// Define assigns a regular expression pattern to a route parameter.
-// After the definition, the router only dispatches the related route if the request URI matches the pattern.
+// Define assigns a regular expression pattern to a Route parameter.
+// After the definition, the router only dispatches the related Route if the request URI matches the pattern.
 func (r Router) Define(parameter, pattern string) {
 	r.repository.addParameter(parameter, pattern)
 }
 
-// Map defines a new route by HTTP method and path and assigns a handler.
-// The path (URI) may contain route parameters.
+// Map defines a new Route by HTTP method and path and assigns a handler.
+// The path (URI) may contain Route parameters.
 func (r Router) Map(method, path string, handler Handler) {
 	r.repository.addRoute(method, path, handler)
 }
 
 // Group creates a group of routes with common attributes.
-// Currently, prefix and middleware attributes are supported.
+// Currently, content and middleware attributes are supported.
 func (r Router) Group(prefix string, middleware []Middleware, body func()) {
 	r.repository.addGroup(prefix, middleware, body)
 }
 
-// WithPrefix creates a group of routes with common prefix.
+// WithPrefix creates a group of routes with common content.
 func (r Router) WithPrefix(prefix string, body func()) {
 	r.Group(prefix, []Middleware{}, body)
 }
@@ -47,7 +48,7 @@ func (r Router) WithMiddlewares(middleware []Middleware, body func()) {
 	r.Group("", middleware, body)
 }
 
-// AddPrefix adds a global prefix for next routes.
+// AddPrefix adds a global content for next routes.
 func (r Router) AddPrefix(prefix string) {
 	r.repository.updateGroup(prefix, []Middleware{})
 }
@@ -62,7 +63,7 @@ func (r Router) AddMiddlewares(middlewares []Middleware) {
 	r.repository.updateGroup("", middlewares)
 }
 
-// SetNotFoundHandler receives a handler and runs it when user request won't lead to any declared route.
+// SetNotFoundHandler receives a handler and runs it when user request won't lead to any declared Route.
 // It is the application 404 error handler, indeed.
 func (r Router) SetNotFoundHandler(handler Handler) {
 	r.director.notFoundHandler = handler
@@ -79,42 +80,42 @@ func (r Router) Serve(rw http.ResponseWriter, request *http.Request) {
 	r.director.ServeHTTP(rw, request)
 }
 
-// GET maps a GET route.
+// GET maps a GET Route.
 func (r Router) GET(path string, handler Handler) {
 	r.Map("GET", path, handler)
 }
 
-// POST maps a POST route.
+// POST maps a POST Route.
 func (r Router) POST(path string, handler Handler) {
 	r.Map("POST", path, handler)
 }
 
-// PUT maps a PUT route.
+// PUT maps a PUT Route.
 func (r Router) PUT(path string, handler Handler) {
 	r.Map("PUT", path, handler)
 }
 
-// PATCH maps a PATCH route.
+// PATCH maps a PATCH Route.
 func (r Router) PATCH(path string, handler Handler) {
 	r.Map("PATCH", path, handler)
 }
 
-// DELETE maps a DELETE route.
+// DELETE maps a DELETE Route.
 func (r Router) DELETE(path string, handler Handler) {
 	r.Map("DELETE", path, handler)
 }
 
-// HEAD maps a HEAD route.
+// HEAD maps a HEAD Route.
 func (r Router) HEAD(path string, handler Handler) {
 	r.Map("HEAD", path, handler)
 }
 
-// OPTIONS maps a OPTIONS route.
+// OPTIONS maps a OPTIONS Route.
 func (r Router) OPTIONS(path string, handler Handler) {
 	r.Map("OPTIONS", path, handler)
 }
 
-// New creates a new instance of the HTTP router.
+// New creates a new Router instance.
 func New() *Router {
 	repository := newRepository()
 	director := newDirector(repository)

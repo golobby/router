@@ -6,7 +6,6 @@ import (
 	"github.com/golobby/router/pkg/response"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"strconv"
 	"testing"
 	"time"
 )
@@ -107,92 +106,68 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	r := router.New()
 	r.Define("id", "[0-9]+")
 
-	r.GET("/{id}", func(c router.Context) error {
+	r.GET("/products/:id", func(c router.Context) error {
 		return c.Text(200, c.Parameter("id"))
 	})
-	r.GET("/{word}/before", func(c router.Context) error {
-		return c.Text(200, c.Parameter("word")+" before")
+	r.GET("/poly/:id", func(c router.Context) error {
+		return c.Text(200, c.Parameter("id"))
 	})
-	r.GET("/{word}", func(c router.Context) error {
+	r.GET("/poly/:word", func(c router.Context) error {
 		return c.Text(200, c.Parameter("word"))
 	})
-	r.GET("/{word}/after", func(c router.Context) error {
+	r.GET("/word/:word/before", func(c router.Context) error {
+		return c.Text(200, c.Parameter("word")+" before")
+	})
+	r.GET("/word/:word", func(c router.Context) error {
+		return c.Text(200, c.Parameter("word"))
+	})
+	r.GET("/word/:word/after", func(c router.Context) error {
 		return c.Text(200, c.Parameter("word")+" after")
 	})
-	r.GET("/fail/{id}", func(c router.Context) error {
-		return c.Text(200, c.Parameter("id"))
-	})
-	r.GET("/multi/{a}/{b}/{c}", func(c router.Context) error {
-		return c.Text(200, strconv.Itoa(len(c.Parameters())))
-	})
-	r.GET("/optional/page/{id?}", func(c router.Context) error {
-		return c.Text(200, c.Parameter("id"))
-	})
-	r.GET("/optional/page2/?{id?}", func(c router.Context) error {
-		return c.Text(200, c.Parameter("id"))
-	})
-	r.GET("/else/no-parameter", func(c router.Context) error {
-		if c.HasParameter("id") {
-			return c.Text(200, "Yes and "+c.Parameter("id"))
-		} else {
-			return c.Text(200, "No but "+c.Parameter("id"))
-		}
+	r.GET("/multiple/:a/:b/:c", func(c router.Context) error {
+		return c.Text(200, c.Parameter("a")+c.Parameter("b")+c.Parameter("c"))
 	})
 
 	var rw *responseWriter
 
 	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/13"))
+	r.Serve(rw, newRequest("GET", "/products/13"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "13", rw.stringBody())
 
 	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/test/before"))
-	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "test before", rw.stringBody())
+	r.Serve(rw, newRequest("GET", "/products/test"))
+	assert.Equal(t, 404, rw.status)
 
 	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/test"))
+	r.Serve(rw, newRequest("GET", "/poly/13"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "13", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/poly/test"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "test", rw.stringBody())
 
 	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/test/after"))
+	r.Serve(rw, newRequest("GET", "/word/test/before"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "test before", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/word/test"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "test", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/word/test/after"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "test after", rw.stringBody())
 
 	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/fail/test"))
-	assert.Equal(t, 404, rw.status)
-
-	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/multi/1/2/3"))
+	r.Serve(rw, newRequest("GET", "/multiple/1/2/3"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "3", rw.stringBody())
-
-	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/optional/page/13"))
-	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "13", rw.stringBody())
-
-	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/optional/page/"))
-	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "", rw.stringBody())
-
-	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/optional/page"))
-	assert.Equal(t, 404, rw.status)
-
-	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/optional/page2"))
-	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "", rw.stringBody())
-
-	rw = newResponse()
-	r.Serve(rw, newRequest("GET", "/else/no-parameter"))
-	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "No but ", rw.stringBody())
+	assert.Equal(t, "123", rw.stringBody())
 }
 
 func TestRouter_With_Context_Parameters(t *testing.T) {
@@ -209,27 +184,27 @@ func TestRouter_With_Context_Parameters(t *testing.T) {
 
 func TestRouter_WithPrefix(t *testing.T) {
 	r := router.New()
-	r.WithPrefix("/prefix", func() {
+	r.WithPrefix("/content", func() {
 		r.GET("/page", func(c router.Context) error {
 			return c.Text(200, "OK")
 		})
 	})
 
 	rw := newResponse()
-	r.Serve(rw, newRequest("GET", "/prefix/page"))
+	r.Serve(rw, newRequest("GET", "/content/page"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "OK", rw.stringBody())
 }
 
 func TestRouter_AddPrefix(t *testing.T) {
 	r := router.New()
-	r.AddPrefix("/prefix")
+	r.AddPrefix("/content")
 	r.GET("/page", func(c router.Context) error {
 		return c.Text(200, "OK")
 	})
 
 	rw := newResponse()
-	r.Serve(rw, newRequest("GET", "/prefix/page"))
+	r.Serve(rw, newRequest("GET", "/content/page"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "OK", rw.stringBody())
 }

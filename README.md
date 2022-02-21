@@ -6,11 +6,12 @@
 
 # GoLobby Router
 GoLobby Router is a lightweight yet powerful HTTP router for Go projects.
-It's built on top of the Golang HTTP package and adds  the following features to it:
+It's built on top of the Golang HTTP package and uses radix tree to provide the following features:
 * Routing based on HTTP method and URI
 * Route parameters and parameter patterns
 * Middleware
 * HTTP Responses (such as JSON, XML, Text, Empty, and Redirect)
+* No footprint!
 
 ## Documentation
 ### Required Go Version
@@ -42,6 +43,9 @@ func main() {
     r.GET("/", func(c router.Context) error {
         return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
+	r.PUT("/products/:id", func(c router.Context) error {
+		return c.Text(http.StatusOK, "Update product with ID: "+c.Parameter("id"))
+	})
     
     log.Fatalln(r.Start(":8000"))
 }
@@ -54,6 +58,14 @@ There are also some methods available for the most used HTTP methods.
 These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`.
 
 ```go
+package main
+
+import (
+	"github.com/golobby/router"
+	"log"
+	"net/http"
+)
+
 func Handler(c router.Context) error {
     return c.Text(http.StatusOK, "Hello from GoLobby Router!")
 }
@@ -78,9 +90,8 @@ func main() {
 
 ### Route Parameters
 
-To specify route parameters, put them inside curly braces like `{id}` or `{id?}` where it's optional.
-In default, the regular expression pattern for parameters is "`[^/]+`".
-You can change it using the `Define()` method.
+To specify route parameters, prepend a colon like `:id`.
+In default, parameters could be anything but you can determine a regex pattern using the `Define()` method. Of course, regex patterns slow down your application, and it is recommended not to use them if possible.
 To catch and check route parameters in your handlers, you'll have the `Parameters()`, `Parameter()`, and `HasParameter()` methods.
 
 ```go
@@ -91,27 +102,13 @@ func main() {
     r.Define("id", "[0-9]+")
    
     // a required parameter
-    r.GET("/posts/{id}", func(c router.Context) error {
+    r.GET("/posts/:id", func(c router.Context) error {
     	return c.Text(200, c.Parameter("id"))
     })
     
     // multiple required parameters
-    r.GET("/posts/{pid}/comments/{cid}", func(c router.Context) error {
+    r.GET("/posts/:id/comments/:cid", func(c router.Context) error {
     	return c.Json(200, c.Parameters())
-    })
-    
-    // an optional parameter
-    r.GET("/posts/{id?}", func(c router.Context) error {
-    	if c.HasParameter("id") {
-    	    return c.Text(200, c.Parameter("id"))
-	} else {
-	    return c.Text(200, "No Parameter")
-	}
-    })
-    
-    // an optional parameter after an optional slash!
-    r.GET("/posts/?{id?}", func(c router.Context) error {
-   	// It runs for "/posts/1", "/posts/", and "/posts"
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -129,6 +126,10 @@ func main() {
    
     r.GET("/empty", func(c router.Context) error {
         return c.Empty(204)
+    })
+
+    r.GET("/redirect", func(c router.Context) error {
+        return c.Redirect(301, "https://github.com/golobby/router")
     })
     
     r.GET("/text", func(c router.Context) error {
@@ -186,8 +187,8 @@ func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
-      r.GET("/posts", PostsIndexHandler)
-      r.GET("/posts/{id}", PostsShowHandler)
+		r.GET("/posts", PostsIndexHandler)
+		r.GET("/posts/:id", PostsShowHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -210,7 +211,7 @@ func main() {
     r := router.New()
     
     r.WithMiddleware(AdminMiddleware, func() {
-      r.GET("/admin/users", UsersHandler)
+		r.GET("/admin/users", UsersHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -242,7 +243,7 @@ func main() {
     r := router.New()
     
     r.Group("/blog", []router.Middleware{Middleware1, Middleware2}, func() {
-      r.GET("/posts", PostsHandler)
+		r.GET("/posts", PostsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -264,7 +265,7 @@ func main() {
     r.AddPrefix("/blog")
 
     r.GET("/posts", PostsHandler)
-    r.GET("/posts/{id}/comments", CommentsHandler)
+    r.GET("/posts/:id/comments", CommentsHandler)
     
     log.Fatalln(r.Start(":8000"))
 }
@@ -285,7 +286,7 @@ func main() {
     r.AddMiddlewares([]router.Middleware{AuthMiddleware, ThrottleMiddleware})
 
     r.GET("/users", UsersHandler)
-    r.GET("/users/{id}/files", FilesHandler)
+    r.GET("/users/:id/files", FilesHandler)
     
     log.Fatalln(r.Start(":8000"))
 }
@@ -306,7 +307,7 @@ func main() {
     r := router.New()
     
     r.SetNotFoundHandler(func(c router.Context) error {
-	return c.Html(404, "<p>404 Not Found</p>")
+	    return c.Html(404, "<p>404 Not Found</p>")
     })
 
     r.GET("/", Handler)
@@ -335,12 +336,12 @@ func main() {
     // Error Handler
     r.AddMiddleware(func (next router.Handler) router.Handler {
         return func(c router.Context) error {
-	    if err := next(c); err != nil {
-	    	myLogger.log(err);
-		retrun c.Html(500, "<p>Something went wrong</p>")
-	    }
-	    
-	    return nil
+            if err := next(c); err != nil {
+                myLogger.log(err);
+                retrun c.Html(500, "<p>Something went wrong</p>")
+            }
+            
+            return nil
         }
     })
 
