@@ -41,6 +41,8 @@ func main() {
     r := router.New()
     
     r.GET("/", func(c router.Context) error {
+        // c.Request() is original http.Request
+	// c.Response() is original http.ResponseWriter
         return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
     r.PUT("/products/:id", func(c router.Context) error {
