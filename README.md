@@ -179,7 +179,7 @@ func main() {
     })
     
     r.GET("/bytes", func(c router.Context) error {
-        return c.Bytes(200, []bytes("This a custom response"))
+        return c.Bytes(200, []bytes("This was some bytes!"))
     })
     
     r.GET("/custom", func(c router.Context) error {
@@ -245,7 +245,7 @@ func main() {
     r := router.New()
     
     r.WithMiddleware(AdminMiddleware, func() {
-		r.GET("/admin/users", UsersHandler)
+        r.GET("/admin/users", UsersHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
