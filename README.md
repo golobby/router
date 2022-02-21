@@ -111,12 +111,12 @@ func main() {
     // "id" parameters must be numeric
     r.Define("id", "[0-9]+")
    
-    // a required parameter
+    // a route with one parameter
     r.GET("/posts/:id", func(c router.Context) error {
     	return c.Text(200, c.Parameter("id"))
     })
     
-    // multiple required parameters
+    // a route with multiple parameters
     r.GET("/posts/:id/comments/:cid", func(c router.Context) error {
     	return c.Json(200, c.Parameters())
     })
