@@ -53,20 +53,20 @@ type Context interface {
 	// Text creates and sends an HTTP text response.
 	Text(status int, body string) error
 
-	// Html creates and sends an HTTP HTML response.
-	Html(status int, body string) error
+	// HTML creates and sends an HTTP HTML response.
+	HTML(status int, body string) error
 
-	// Json creates and sends an HTTP JSON response.
-	Json(status int, body interface{}) error
+	// JSON creates and sends an HTTP JSON response.
+	JSON(status int, body interface{}) error
 
-	// JsonPretty creates and sends an HTTP JSON (with indents) response.
-	JsonPretty(status int, body interface{}) error
+	// PrettyJSON creates and sends an HTTP JSON (with indents) response.
+	PrettyJSON(status int, body interface{}) error
 
-	// Xml creates and sends an HTTP XML response.
-	Xml(status int, body interface{}) error
+	// XML creates and sends an HTTP XML response.
+	XML(status int, body interface{}) error
 
-	// XmlPretty creates and sends an HTTP XML (with indents) response.
-	XmlPretty(status int, body interface{}) error
+	// PrettyXML creates and sends an HTTP XML (with indents) response.
+	PrettyXML(status int, body interface{}) error
 }
 
 // DefaultContext is the default implementation of Context interface.
@@ -146,12 +146,12 @@ func (d *DefaultContext) Text(status int, body string) error {
 	return d.Bytes(status, []byte(body))
 }
 
-func (d *DefaultContext) Html(status int, body string) error {
+func (d *DefaultContext) HTML(status int, body string) error {
 	d.Response().Header().Set("Content-Type", "text/html")
 	return d.Bytes(status, []byte(body))
 }
 
-func (d *DefaultContext) Json(status int, body interface{}) error {
+func (d *DefaultContext) JSON(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/json")
 	bytes, err := json.Marshal(body)
 	if err != nil {
@@ -160,7 +160,7 @@ func (d *DefaultContext) Json(status int, body interface{}) error {
 	return d.Bytes(status, bytes)
 }
 
-func (d *DefaultContext) JsonPretty(status int, body interface{}) error {
+func (d *DefaultContext) PrettyJSON(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/json")
 	bytes, err := json.MarshalIndent(body, "", "  ")
 	if err != nil {
@@ -169,7 +169,7 @@ func (d *DefaultContext) JsonPretty(status int, body interface{}) error {
 	return d.Bytes(status, bytes)
 }
 
-func (d *DefaultContext) Xml(status int, body interface{}) error {
+func (d *DefaultContext) XML(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/xml")
 	bytes, err := xml.MarshalIndent(body, "", "")
 	if err != nil {
@@ -178,7 +178,7 @@ func (d *DefaultContext) Xml(status int, body interface{}) error {
 	return d.Bytes(status, bytes)
 }
 
-func (d *DefaultContext) XmlPretty(status int, body interface{}) error {
+func (d *DefaultContext) PrettyXML(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/xml")
 	bytes, err := xml.MarshalIndent(body, "", "  ")
 	if err != nil {

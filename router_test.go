@@ -353,35 +353,35 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 		return c.Text(200, "Text")
 	})
 	r.GET("/html", func(c router.Context) error {
-		return c.Html(200, "<p>HTML</p>")
+		return c.HTML(200, "<p>HTML</p>")
 	})
 	r.GET("/json", func(c router.Context) error {
-		return c.Json(200, response.M{"message": "JSON"})
+		return c.JSON(200, response.M{"message": "JSON"})
 	})
 	r.GET("/json-fail", func(c router.Context) error {
-		return c.Json(200, func() {})
+		return c.JSON(200, func() {})
 	})
 	r.GET("/json-pretty", func(c router.Context) error {
-		return c.JsonPretty(200, response.M{"message": "JSON"})
+		return c.PrettyJSON(200, response.M{"message": "JSON"})
 	})
 	r.GET("/json-pretty-fail", func(c router.Context) error {
-		return c.JsonPretty(200, func() {})
+		return c.PrettyJSON(200, func() {})
 	})
 	r.GET("/xml", func(c router.Context) error {
-		return c.Xml(200, struct {
+		return c.XML(200, struct {
 			XMLName struct{} `xml:"User"`
 		}{})
 	})
 	r.GET("/xml-fail", func(c router.Context) error {
-		return c.Xml(200, func() {})
+		return c.XML(200, func() {})
 	})
 	r.GET("/xml-pretty", func(c router.Context) error {
-		return c.XmlPretty(200, struct {
+		return c.PrettyXML(200, struct {
 			XMLName struct{} `xml:"User"`
 		}{})
 	})
 	r.GET("/xml-pretty-fail", func(c router.Context) error {
-		return c.XmlPretty(200, func() {})
+		return c.PrettyXML(200, func() {})
 	})
 
 	rw := newResponse()

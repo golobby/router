@@ -118,7 +118,7 @@ func main() {
     
     // a route with multiple parameters
     r.GET("/posts/:id/comments/:cid", func(c router.Context) error {
-    	return c.Json(200, c.Parameters())
+    	return c.JSON(200, c.Parameters())
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -127,67 +127,68 @@ func main() {
 
 ### Responses
 
-The router comes with `Empty`, `Redirect`, `Text`, `Html`, `Json`, `JsonPretty`, `Xml`, and `XmlPretty` responses out of the box.
+The router comes with `Empty`, `Redirect`, `Text`, `HTML`, `JSON`, `PrettyJSON`, `XML`, and `PrettyXML` responses out of the box.
 The examples below demonstrate how to use built-in and custom responses.
 
 ```go
 package main
 
 import (
-    "github.com/golobby/router"
-    "log"
-    "net/http"
+	"github.com/golobby/router"
+	"github.com/golobby/router/pkg/response"
+	"log"
+	"net/http"
 )
 
 func main() {
-    r := router.New()
-   
-    r.GET("/empty", func(c router.Context) error {
-        return c.Empty(204)
-    })
+	r := router.New()
 
-    r.GET("/redirect", func(c router.Context) error {
-        return c.Redirect(301, "https://github.com/golobby/router")
-    })
-    
-    r.GET("/text", func(c router.Context) error {
-        return c.Text(200, "A text response")
-    })
-    
-    r.GET("/html", func(c router.Context) error {
-        return c.Html(200, "<p>A HTML response</p>")
-    })
-   
-    r.GET("/json", func(c router.Context) error {
-        return c.Json(200, User{"id": 13})
-    })
-    
-    r.GET("/json", func(c router.Context) error {
-        return c.Json(200, response.M{"message": "A JSON response using response.M helper"})
-    })
-    
-    r.GET("/json-pretty", func(c router.Context) error {
-        return c.JsonPretty(200, response.M{"message": "A pretty JSON response"})
-    })
-    
-    r.GET("/xml", func(c router.Context) error {
-        return c.Xml(200, User{"id": 13})
-    })
-    
-    r.GET("/xml-pretty", func(c router.Context) error {
-        return c.XmlPretty(200, User{"id": 13})
-    })
-    
-    r.GET("/bytes", func(c router.Context) error {
-        return c.Bytes(200, []bytes("This was some bytes!"))
-    })
-    
-    r.GET("/custom", func(c router.Context) error {
-        c.Response().Header().Set("Content-Type", "text/csv")
-        return c.Bytes(200, []bytes("Column 1, Column 2, Column 3"))
-    })
-    
-    log.Fatalln(r.Start(":8000"))
+	r.GET("/empty", func(c router.Context) error {
+		return c.Empty(204)
+	})
+
+	r.GET("/redirect", func(c router.Context) error {
+		return c.Redirect(301, "https://github.com/golobby/router")
+	})
+
+	r.GET("/text", func(c router.Context) error {
+		return c.Text(200, "A text response")
+	})
+
+	r.GET("/html", func(c router.Context) error {
+		return c.HTML(200, "<p>A HTML response</p>")
+	})
+
+	r.GET("/json", func(c router.Context) error {
+		return c.JSON(200, User{"id": 13})
+	})
+
+	r.GET("/json", func(c router.Context) error {
+		return c.JSON(200, response.M{"message": "A JSON response using response.M helper"})
+	})
+
+	r.GET("/json-pretty", func(c router.Context) error {
+		return c.PrettyJSON(200, response.M{"message": "A pretty JSON response"})
+	})
+
+	r.GET("/xml", func(c router.Context) error {
+		return c.XML(200, User{"id": 13})
+	})
+
+	r.GET("/xml-pretty", func(c router.Context) error {
+		return c.PrettyXML(200, User{"id": 13})
+	})
+
+	r.GET("/bytes", func(c router.Context) error {
+		return c.Bytes(200, []bytes("This was some bytes!"))
+	})
+
+	r.GET("/custom", func(c router.Context) error {
+		c.Response().Header().Set("Content-Type", "text/csv")
+		return c.Bytes(200, []bytes("Column 1, Column 2, Column 3"))
+	})
+
+	log.Fatalln(r.Start(":8000"))
 }
 ```
 
@@ -385,7 +386,7 @@ func main() {
     r := router.New()
     
     r.SetNotFoundHandler(func(c router.Context) error {
-        return c.Html(404, "<p>404 Not Found</p>")
+        return c.HTML(404, "<p>404 Not Found</p>")
     })
 
     r.GET("/", Handler)
@@ -423,8 +424,8 @@ func main() {
     r.AddMiddleware(func (next router.Handler) router.Handler {
         return func(c router.Context) error {
             if err := next(c); err != nil {
-                myLogger.log(err);
-                retrun c.Html(500, "<p>Something went wrong</p>")
+                myLogger.log(err)
+                return c.HTML(500, "<p>Something went wrong</p>")
             }
             
 	    // No error will raise to the router base handler
