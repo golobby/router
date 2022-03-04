@@ -135,6 +135,7 @@ package main
 
 import (
     "github.com/golobby/router"
+    "github.com/golobby/router/pkg/response"
     "log"
     "net/http"
 )
@@ -174,10 +175,10 @@ The examples below demonstrate how to use built-in and custom responses.
 package main
 
 import (
-	"github.com/golobby/router"
-	"github.com/golobby/router/pkg/response"
-	"log"
-	"net/http"
+    "github.com/golobby/router"
+    "github.com/golobby/router/pkg/response"
+    "log"
+    "net/http"
 )
 
 func main() {
