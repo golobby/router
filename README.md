@@ -164,11 +164,11 @@ func main() {
 	})
 
 	r.GET("/json", func(c router.Context) error {
-		return c.JSON(200, response.M{"message": "A JSON response using response.M helper"})
+		return c.JSON(200, response.M{"message": "Using response.M helper"})
 	})
 
 	r.GET("/json-pretty", func(c router.Context) error {
-		return c.PrettyJSON(200, response.M{"message": "A pretty JSON response"})
+		return c.PrettyJSON(200, response.M{"message": "A pretty JSON response!"})
 	})
 
 	r.GET("/xml", func(c router.Context) error {
@@ -180,7 +180,7 @@ func main() {
 	})
 
 	r.GET("/bytes", func(c router.Context) error {
-		return c.Bytes(200, []bytes("This was some bytes!"))
+		return c.Bytes(200, []bytes("Some bytes!"))
 	})
 
 	r.GET("/custom", func(c router.Context) error {
