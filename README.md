@@ -253,12 +253,11 @@ func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
-        r.GET("/posts", PostsHandler)
-        r.GET("/posts/:id", PostHandler)
-    
-    r.WithPrefix("/pages", func() {
-            r.GET("/about", AboutHandler)
-            r.GET("/contact", ContactHandler)
+        r.GET("/posts", PostsHandler)    // "/blog/posts"
+        r.GET("/posts/:id", PostHandler) // "/blog/posts/:id"
+        r.WithPrefix("/pages", func() {
+            r.GET("/about", AboutHandler)     // "/blog/pages/about"
+            r.GET("/contact", ContactHandler) // "/blog/pages/contact"
         })
     })
     
@@ -430,6 +429,7 @@ import (
 func main() {
     r := router.New()
     
+    // Custom (HTML) Not Found Handler
     r.SetNotFoundHandler(func(c router.Context) error {
         return c.HTML(404, "<p>404 Not Found</p>")
     })
