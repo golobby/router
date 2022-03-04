@@ -87,10 +87,6 @@ func (t *tree) searchByParts(parent *node, parts []string, position int, paramet
 
 // searchByName finds the node by route name.
 func (t *tree) searchByName(node *node, name string) *node {
-	if node == nil {
-		return nil
-	}
-
 	if node.Route != nil {
 		if node.Route.Name == name {
 			return node

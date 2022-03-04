@@ -135,6 +135,9 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	r.GET("/multiple/:a/:b/:c", func(c router.Context) error {
 		return c.Text(200, strconv.Itoa(len(c.Parameters())))
 	})
+	r.GET("/no-parameter", func(c router.Context) error {
+		return c.Text(200, c.Parameter("id"))
+	})
 
 	var rw *responseWriter
 
@@ -181,6 +184,11 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	r.Serve(rw, newRequest("GET", "/multiple/1/2/3"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "3", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/no-parameter"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "", rw.stringBody())
 }
 
 func TestRouter_With_Context_Parameters(t *testing.T) {
