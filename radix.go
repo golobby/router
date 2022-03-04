@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// node holds a radix tree node including content (URI part), node children, and related route.
+// node holds a radix tree node including content (route path part), node children, and related route.
 type node struct {
 	content  string
 	Route    *Route
@@ -29,33 +29,42 @@ func (t *tree) add(route *Route) {
 	t.insert(t.head, newNode(route, parts[len(parts)-1]), parts, 0)
 }
 
-// find searches for a route by traversing the radix tree.
+// findByRequest searches for a route by request method and URI.
 // It returns the route and its parameters.
-func (t *tree) find(method, uri string) (*Route, map[string]string) {
+func (t *tree) findByRequest(method, uri string) (*Route, map[string]string) {
 	parts := strings.Split(method+uri, "/")
 	parameters := map[int]string{}
 
-	if node := t.search(t.head, parts, 0, parameters); node != nil {
-		return node.Route, t.extract(node.Route, parameters)
+	if node := t.searchByParts(t.head, parts, 0, parameters); node != nil {
+		return node.Route, t.extractParameters(node.Route, parameters)
 	}
 
 	return nil, map[string]string{}
 }
 
-// extract finds the route parameters by mapping the parameter position and route path.
-func (t *tree) extract(route *Route, parameters map[int]string) map[string]string {
-	parts := strings.Split(route.Method+route.Path, "/")
-
-	list := map[string]string{}
-	for i, value := range parameters {
-		list[parts[i][1:]] = value
+// findByName searches for a route by name.
+func (t *tree) findByName(name string) *Route {
+	if node := t.searchByName(t.head, name); node != nil {
+		return node.Route
 	}
 
-	return list
+	return nil
 }
 
-// search finds the route by recursive traversing the radix tree.
-func (t *tree) search(parent *node, parts []string, position int, parameters map[int]string) *node {
+// extractParameters finds the route parameters (name-value pairs) by mapping the parameter position and route path.
+func (t *tree) extractParameters(route *Route, parameterValues map[int]string) map[string]string {
+	routeParts := strings.Split(route.Method+route.Path, "/")
+
+	parameters := map[string]string{}
+	for i, value := range parameterValues {
+		parameters[routeParts[i][1:]] = value
+	}
+
+	return parameters
+}
+
+// searchByParts finds the node by parts.
+func (t *tree) searchByParts(parent *node, parts []string, position int, parameters map[int]string) *node {
 	isLeaf := position == len(parts)-1
 
 	for _, child := range parent.Children {
@@ -68,8 +77,29 @@ func (t *tree) search(parent *node, parts []string, position int, parameters map
 			if isLeaf {
 				return child
 			} else {
-				return t.search(child, parts, position+1, parameters)
+				return t.searchByParts(child, parts, position+1, parameters)
 			}
+		}
+	}
+
+	return nil
+}
+
+// searchByName finds the node by route name.
+func (t *tree) searchByName(node *node, name string) *node {
+	if node == nil {
+		return nil
+	}
+
+	if node.Route != nil {
+		if node.Route.Name == name {
+			return node
+		}
+	}
+
+	for _, child := range node.Children {
+		if n := t.searchByName(child, name); n != nil {
+			return n
 		}
 	}
 
@@ -101,20 +131,20 @@ func (t *tree) insert(parent, node *node, parts []string, index int) {
 	}
 }
 
-// match compares a URI part with a route path part and returns the boolean result.
-func (t *tree) match(token, part string) (bool, string, string) {
-	if strings.HasPrefix(token, ":") {
-		name := token[1:]
+// match compares a request URI part with a route path part and returns the boolean result.
+func (t *tree) match(routePart, UriPart string) (bool, string, string) {
+	if strings.HasPrefix(routePart, ":") {
+		name := routePart[1:]
 		if pattern, exist := t.patterns[name]; exist {
 			pathPattern := regexp.MustCompile("^" + pattern + "$")
-			if pathPattern.MatchString(part) {
-				return true, name, part
+			if pathPattern.MatchString(UriPart) {
+				return true, name, UriPart
 			}
 		} else {
-			return true, name, part
+			return true, name, UriPart
 		}
 	}
-	return token == part, "", ""
+	return routePart == UriPart, "", ""
 }
 
 // newTree creates a new tree instance.

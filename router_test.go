@@ -195,6 +195,42 @@ func TestRouter_With_Context_Parameters(t *testing.T) {
 	assert.Equal(t, "GET /", rw.stringBody())
 }
 
+func TestRouter_With_Route_Names(t *testing.T) {
+	r := router.New()
+	r.GET("/", func(c router.Context) error {
+		return c.Text(200, c.URL("home", nil))
+	}).Name = "home"
+	r.GET("/single/:id", func(c router.Context) error {
+		return c.Text(200, c.URL("single", map[string]string{"id": "13"}))
+	}).Name = "single"
+	r.GET("/multi/:one/:two", func(c router.Context) error {
+		return c.Text(200, c.URL("multi", map[string]string{"one": "13", "two": "33"}))
+	}).Name = "multi"
+	r.GET("/else/:id", func(c router.Context) error {
+		return c.Text(200, c.URL("other", map[string]string{"id": "13"}))
+	}).Name = "else"
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "/", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/single/1"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "/single/13", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/multi/1/2"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "/multi/13/33", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/else/1"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "", rw.stringBody())
+}
+
 func TestRouter_WithPrefix(t *testing.T) {
 	r := router.New()
 	r.WithPrefix("/path", func() {

@@ -11,32 +11,24 @@ type Context interface {
 	// Route returns the dispatched Route
 	Route() *Route
 
-	// SetRoute sets the dispatched Route
-	SetRoute(route *Route)
-
 	// Request returns the HTTP request.
 	Request() *http.Request
-
-	// SetRequest sets the HTTP request.
-	SetRequest(request *http.Request)
 
 	// Response return the HTTP responseWriter.
 	Response() http.ResponseWriter
 
-	// SetResponse sets the HTTP responseWriter.
-	SetResponse(rw http.ResponseWriter)
-
 	// Parameters returns Route parameters.
 	Parameters() map[string]string
-
-	// SetParameters sets the router parameters.
-	SetParameters(parameters map[string]string)
 
 	// Parameter returns a router parameter by name.
 	Parameter(name string) string
 
 	// HasParameter checks if router parameter exists.
 	HasParameter(name string) bool
+
+	// URL generates a URL for given route name and actual parameters.
+	// It returns an empty string if it cannot find any route.
+	URL(route string, parameters map[string]string) string
 
 	// Status sets the HTTP responseWriter status code.
 	Status(status int)
@@ -72,6 +64,7 @@ type Context interface {
 // DefaultContext is the default implementation of Context interface.
 type DefaultContext struct {
 	route      *Route
+	repository *repository
 	request    *http.Request
 	rw         http.ResponseWriter
 	parameters map[string]string
@@ -81,32 +74,15 @@ func (d *DefaultContext) Route() *Route {
 	return d.route
 }
 
-func (d *DefaultContext) SetRoute(route *Route) {
-	d.route = route
-}
-
 func (d *DefaultContext) Request() *http.Request {
 	return d.request
 }
-
-func (d *DefaultContext) SetRequest(request *http.Request) {
-	d.request = request
-}
-
 func (d *DefaultContext) Response() http.ResponseWriter {
 	return d.rw
 }
 
-func (d *DefaultContext) SetResponse(rw http.ResponseWriter) {
-	d.rw = rw
-}
-
 func (d *DefaultContext) Parameters() map[string]string {
 	return d.parameters
-}
-
-func (d *DefaultContext) SetParameters(parameters map[string]string) {
-	d.parameters = parameters
 }
 
 func (d *DefaultContext) Parameter(name string) string {
@@ -119,6 +95,13 @@ func (d *DefaultContext) Parameter(name string) string {
 func (d *DefaultContext) HasParameter(name string) bool {
 	_, exist := d.parameters[name]
 	return exist
+}
+
+func (d *DefaultContext) URL(route string, parameters map[string]string) string {
+	if route := d.repository.findByName(route); route != nil {
+		return route.ToURL(parameters)
+	}
+	return ""
 }
 
 func (d *DefaultContext) Status(status int) {
