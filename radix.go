@@ -25,7 +25,7 @@ type tree struct {
 
 // add appends a new route and inserts required nodes in the radix tree.
 func (t *tree) add(route *Route) {
-	parts := strings.Split(route.Method+route.Path, "/")
+	parts := strings.Split(route.method+route.path, "/")
 	t.insert(t.head, newNode(route, parts[len(parts)-1]), parts, 0)
 }
 
@@ -53,7 +53,7 @@ func (t *tree) findByName(name string) *Route {
 
 // extractParameters finds the route parameters (name-value pairs) by mapping the parameter position and route path.
 func (t *tree) extractParameters(route *Route, parameterValues map[int]string) map[string]string {
-	routeParts := strings.Split(route.Method+route.Path, "/")
+	routeParts := strings.Split(route.method+route.path, "/")
 
 	parameters := map[string]string{}
 	for i, value := range parameterValues {
@@ -88,7 +88,7 @@ func (t *tree) searchByParts(parent *node, parts []string, position int, paramet
 // searchByName finds the node by route name.
 func (t *tree) searchByName(node *node, name string) *node {
 	if node.Route != nil {
-		if node.Route.Name == name {
+		if node.Route.name == name {
 			return node
 		}
 	}

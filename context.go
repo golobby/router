@@ -99,7 +99,7 @@ func (d *DefaultContext) HasParameter(name string) bool {
 
 func (d *DefaultContext) URL(route string, parameters map[string]string) string {
 	if route := d.repository.findByName(route); route != nil {
-		return route.ToURL(parameters)
+		return route.URL(parameters)
 	}
 	return ""
 }

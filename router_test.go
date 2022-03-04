@@ -194,7 +194,7 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 func TestRouter_With_Context_Parameters(t *testing.T) {
 	r := router.New()
 	r.GET("/", func(c router.Context) error {
-		return c.Text(200, c.Route().Method+" "+c.Route().Path)
+		return c.Text(200, c.Route().Method()+" "+c.Route().Path())
 	})
 
 	rw := newResponse()
@@ -207,16 +207,16 @@ func TestRouter_With_Route_Names(t *testing.T) {
 	r := router.New()
 	r.GET("/", func(c router.Context) error {
 		return c.Text(200, c.URL("home", nil))
-	}).Name = "home"
+	}).SetName("home")
 	r.GET("/single/:id", func(c router.Context) error {
 		return c.Text(200, c.URL("single", map[string]string{"id": "13"}))
-	}).Name = "single"
+	}).SetName("single")
 	r.GET("/multi/:one/:two", func(c router.Context) error {
 		return c.Text(200, c.URL("multi", map[string]string{"one": "13", "two": "33"}))
-	}).Name = "multi"
+	}).SetName("multi")
 	r.GET("/else/:id", func(c router.Context) error {
 		return c.Text(200, c.URL("other", map[string]string{"id": "13"}))
-	}).Name = "else"
+	}).SetName("else")
 
 	rw := newResponse()
 	r.Serve(rw, newRequest("GET", "/"))
