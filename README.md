@@ -154,12 +154,9 @@ func main() {
     
     r.GET("/links", func(c router.Context) error {
         return c.JSON(http.StatusOK, response.M{
-            // "/"
-            "home": c.URL("home", nil),
-            // "/posts/1"
-            "post-1": c.URL("post", map[string]string{"id": "1"}),
-            // "/posts/2"
-            "post-2": c.URL("post", map[string]string{"id": "2"}),
+            "home": c.URL("home", nil), // "/"
+            "post-1": c.URL("post", map[string]string{"id": "1"}), // "/posts/1"
+            "post-2": c.URL("post", map[string]string{"id": "2"}), // "/posts/2"
         })
     })
     
