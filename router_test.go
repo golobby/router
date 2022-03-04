@@ -197,16 +197,34 @@ func TestRouter_With_Context_Parameters(t *testing.T) {
 
 func TestRouter_WithPrefix(t *testing.T) {
 	r := router.New()
-	r.WithPrefix("/content", func() {
-		r.GET("/page", func(c router.Context) error {
-			return c.Text(200, "OK")
+	r.WithPrefix("/path", func() {
+		r.WithPrefix("/to", func() {
+			r.GET("/page", func(c router.Context) error {
+				return c.Text(200, "Page1")
+			})
 		})
+		r.GET("/page", func(c router.Context) error {
+			return c.Text(200, "Page2")
+		})
+	})
+	r.GET("/page", func(c router.Context) error {
+		return c.Text(200, "Page3")
 	})
 
 	rw := newResponse()
-	r.Serve(rw, newRequest("GET", "/content/page"))
+	r.Serve(rw, newRequest("GET", "/path/to/page"))
 	assert.Equal(t, 200, rw.status)
-	assert.Equal(t, "OK", rw.stringBody())
+	assert.Equal(t, "Page1", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/path/page"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "Page2", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/page"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "Page3", rw.stringBody())
 }
 
 func TestRouter_AddPrefix(t *testing.T) {
@@ -323,25 +341,6 @@ func TestRouter_Internal_Error(t *testing.T) {
 
 }
 
-func TestRouter_Start(t *testing.T) {
-	r := router.New()
-	r.GET("/", func(c router.Context) error {
-		return c.Text(200, "OK")
-	})
-
-	ec := make(chan error)
-	go func() {
-		ec <- r.Start(":8585")
-	}()
-
-	select {
-	case err := <-ec:
-		assert.Fail(t, err.Error())
-	case <-time.After(3 * time.Second):
-		assert.True(t, true)
-	}
-}
-
 func TestRouter_With_Different_Responses(t *testing.T) {
 	r := router.New()
 	r.GET("/empty", func(c router.Context) error {
@@ -452,4 +451,23 @@ func TestRouter_With_Different_Responses(t *testing.T) {
 	r.Serve(rw, newRequest("GET", "/xml-pretty-fail"))
 	assert.Equal(t, 500, rw.status)
 	assert.Equal(t, InternalErrorJson, rw.stringBody())
+}
+
+func TestRouter_Start(t *testing.T) {
+	r := router.New()
+	r.GET("/", func(c router.Context) error {
+		return c.Text(200, "OK")
+	})
+
+	ec := make(chan error)
+	go func() {
+		ec <- r.Start(":8585")
+	}()
+
+	select {
+	case err := <-ec:
+		assert.Fail(t, err.Error())
+	case <-time.After(3 * time.Second):
+		assert.True(t, true)
+	}
 }

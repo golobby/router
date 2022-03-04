@@ -8,7 +8,7 @@ import (
 )
 
 // Router is the entry point of the package.
-// It gets routes, Route parameter patterns, and middleware then dispatches them.
+// It gets routes, Route parameter patterns, and middlewares then dispatches them.
 // It receives HTTP requests, finds the related Route then runs the Route handler through its middlewares.
 type Router struct {
 	repository *repository
@@ -28,7 +28,7 @@ func (r Router) Map(method, path string, handler Handler) {
 }
 
 // Group creates a group of routes with common attributes.
-// Currently, content and middleware attributes are supported.
+// Currently, content and middlewares attributes are supported.
 func (r Router) Group(prefix string, middleware []Middleware, body func()) {
 	r.repository.addGroup(prefix, middleware, body)
 }
@@ -38,7 +38,7 @@ func (r Router) WithPrefix(prefix string, body func()) {
 	r.Group(prefix, []Middleware{}, body)
 }
 
-// WithMiddleware creates a group of routes with common middleware.
+// WithMiddleware creates a group of routes with common middlewares.
 func (r Router) WithMiddleware(middleware Middleware, body func()) {
 	r.Group("", []Middleware{middleware}, body)
 }
@@ -48,17 +48,17 @@ func (r Router) WithMiddlewares(middleware []Middleware, body func()) {
 	r.Group("", middleware, body)
 }
 
-// AddPrefix adds a global content for next routes.
+// AddPrefix adds a global content for next or all routes.
 func (r Router) AddPrefix(prefix string) {
 	r.repository.updateGroup(prefix, []Middleware{})
 }
 
-// AddMiddleware adds a global middleware for next routes.
+// AddMiddleware adds a global middlewares for next or all routes.
 func (r Router) AddMiddleware(middleware Middleware) {
 	r.repository.updateGroup("", []Middleware{middleware})
 }
 
-// AddMiddlewares adds set of global middlewares for next routes.
+// AddMiddlewares adds set of global middlewares for next or all routes.
 func (r Router) AddMiddlewares(middlewares []Middleware) {
 	r.repository.updateGroup("", middlewares)
 }

@@ -4,26 +4,24 @@ import (
 	"errors"
 )
 
-// repository holds the defined routes, groups, and patterns.
+// repository holds the radix tree and current stateStack.
 type repository struct {
-	tree       *tree
-	routes     []*Route
-	parameters map[string]string
-	collector  *collector
+	tree  *tree
+	state *stateStack
 }
 
 // addRoute adds a new Route to the repository.
 func (r *repository) addRoute(method, path string, handler Handler) {
-	r.tree.add(newRoute(method, r.collector.active.prefix+path, r.stack(handler)))
+	r.tree.add(newRoute(method, r.state.prefix()+path, r.stack(handler)))
 }
 
-// stack merges handler and middleware to create a stack of callables the Route needs to call.
+// stack merges handler and middlewares to create a stack of callables the Route is going to call.
 func (r *repository) stack(handler Handler) []Handler {
-	stack := make([]Handler, len(r.collector.active.middleware)+1)
+	stack := make([]Handler, len(r.state.middlewares())+1)
 	stack = append(stack, handler)
 
-	for i := len(r.collector.active.middleware); i > 0; i-- {
-		stack = append(stack, r.collector.active.middleware[i-1](stack[len(stack)-1]))
+	for i := len(r.state.middlewares()); i > 0; i-- {
+		stack = append(stack, r.state.middlewares()[i-1](stack[len(stack)-1]))
 	}
 
 	return stack
@@ -31,14 +29,14 @@ func (r *repository) stack(handler Handler) []Handler {
 
 // addGroup adds a new group of routes to the repository.
 func (r *repository) addGroup(prefix string, middleware []Middleware, body func()) {
-	r.collector.update(prefix, middleware)
+	r.state.push(prefix, middleware)
 	body()
-	r.collector.rollback()
+	r.state.pop()
 }
 
-// updateGroup update the active group without rollback.
+// updateGroup push the current group without pop.
 func (r *repository) updateGroup(prefix string, middleware []Middleware) {
-	r.collector.update(prefix, middleware)
+	r.state.push(prefix, middleware)
 }
 
 // addParameter adds a new Route parameter pattern to the repository.
@@ -59,8 +57,7 @@ func (r *repository) find(method, uri string) (*Route, map[string]string, error)
 // newRepository creates a new repository instance.
 func newRepository() *repository {
 	return &repository{
-		parameters: map[string]string{},
-		collector:  newCollector(),
-		tree:       newTree(),
+		state: newStateStack(),
+		tree:  newTree(),
 	}
 }
