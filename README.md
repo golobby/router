@@ -214,8 +214,13 @@ func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
-        r.GET("/posts", PostsIndexHandler)
-        r.GET("/posts/:id", PostsShowHandler)
+        r.GET("/posts", PostsHandler)
+        r.GET("/posts/:id", PostHandler)
+	
+	r.WithPrefix("/pages", func() {
+            r.GET("/about", AboutHandler)
+            r.GET("/contact", ContactHandler)
+        })
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -270,8 +275,9 @@ import (
 func main() {
     r := router.New()
     
-    r.WithMiddlewares([]router.Middleware{Middleware1, Middleware2, Middleware3}, func() {
-        r.GET("/posts", PostsHandler)
+    middlewares := []router.Middleware{Middleware1, Middleware2, Middleware3}
+    r.WithMiddlewares(middlewares, func() {
+        r.GET("/posts", PostsIndexHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
