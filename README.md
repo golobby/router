@@ -42,7 +42,7 @@ func main() {
     
     r.GET("/", func(c router.Context) error {
         // c.Request() is original http.Request
-	// c.Response() is original http.ResponseWriter
+    // c.Response() is original http.ResponseWriter
         return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
     r.PUT("/products/:id", func(c router.Context) error {
@@ -113,12 +113,12 @@ func main() {
    
     // a route with one parameter
     r.GET("/posts/:id", func(c router.Context) error {
-    	return c.Text(http.StatusOK, c.Parameter("id"))
+        return c.Text(http.StatusOK, c.Parameter("id"))
     })
     
     // a route with multiple parameters
     r.GET("/posts/:id/comments/:cid", func(c router.Context) error {
-    	return c.JSON(http.StatusOK, c.Parameters())
+        return c.JSON(http.StatusOK, c.Parameters())
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -144,22 +144,22 @@ func main() {
     r := router.New()
     
     r.GET("/", func(c router.Context) error {
-    	return c.Text(http.StatusOK, "I am the home!")
+        return c.Text(http.StatusOK, "I am the home!")
     }).SetName("home")
     
     r.GET("/posts/:id", func(c router.Context) error {
-    	return c.Text(http.StatusOK, "I am a post!")
+        return c.Text(http.StatusOK, "I am a post!")
     }).SetName("post")
     
     r.GET("/links", func(c router.Context) error {
-    	return c.JSON(http.StatusOK, response.M{
-	    // URL: /
-	    "home": c.URL("home", nil),
-	    // URL: /posts/1
-	    "post-1": c.URL("post", map[string]string{"id": "1"}),
-	    // URL: /posts/2
-	    "post-2": c.URL("post", map[string]string{"id": "2"}),
-	})
+        return c.JSON(http.StatusOK, response.M{
+        // URL: /
+        "home": c.URL("home", nil),
+        // URL: /posts/1
+        "post-1": c.URL("post", map[string]string{"id": "1"}),
+        // URL: /posts/2
+        "post-2": c.URL("post", map[string]string{"id": "2"}),
+    })
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -182,54 +182,54 @@ import (
 )
 
 func main() {
-	r := router.New()
+    r := router.New()
 
-	r.GET("/empty", func(c router.Context) error {
-		return c.Empty(204)
-	})
+    r.GET("/empty", func(c router.Context) error {
+        return c.Empty(204)
+    })
 
-	r.GET("/redirect", func(c router.Context) error {
-		return c.Redirect(301, "https://github.com/golobby/router")
-	})
+    r.GET("/redirect", func(c router.Context) error {
+        return c.Redirect(301, "https://github.com/golobby/router")
+    })
 
-	r.GET("/text", func(c router.Context) error {
-		return c.Text(200, "A text response")
-	})
+    r.GET("/text", func(c router.Context) error {
+        return c.Text(200, "A text response")
+    })
 
-	r.GET("/html", func(c router.Context) error {
-		return c.HTML(200, "<p>A HTML response</p>")
-	})
+    r.GET("/html", func(c router.Context) error {
+        return c.HTML(200, "<p>A HTML response</p>")
+    })
 
-	r.GET("/json", func(c router.Context) error {
-		return c.JSON(200, User{"id": 13})
-	})
+    r.GET("/json", func(c router.Context) error {
+        return c.JSON(200, User{"id": 13})
+    })
 
-	r.GET("/json", func(c router.Context) error {
-		return c.JSON(200, response.M{"message": "Using response.M helper"})
-	})
+    r.GET("/json", func(c router.Context) error {
+        return c.JSON(200, response.M{"message": "Using response.M helper"})
+    })
 
-	r.GET("/json-pretty", func(c router.Context) error {
-		return c.PrettyJSON(200, response.M{"message": "A pretty JSON response!"})
-	})
+    r.GET("/json-pretty", func(c router.Context) error {
+        return c.PrettyJSON(200, response.M{"message": "A pretty JSON response!"})
+    })
 
-	r.GET("/xml", func(c router.Context) error {
-		return c.XML(200, User{"id": 13})
-	})
+    r.GET("/xml", func(c router.Context) error {
+        return c.XML(200, User{"id": 13})
+    })
 
-	r.GET("/xml-pretty", func(c router.Context) error {
-		return c.PrettyXML(200, User{"id": 13})
-	})
+    r.GET("/xml-pretty", func(c router.Context) error {
+        return c.PrettyXML(200, User{"id": 13})
+    })
 
-	r.GET("/bytes", func(c router.Context) error {
-		return c.Bytes(200, []bytes("Some bytes!"))
-	})
+    r.GET("/bytes", func(c router.Context) error {
+        return c.Bytes(200, []bytes("Some bytes!"))
+    })
 
-	r.GET("/custom", func(c router.Context) error {
-		c.Response().Header().Set("Content-Type", "text/csv")
-		return c.Bytes(200, []bytes("Column 1, Column 2, Column 3"))
-	})
+    r.GET("/custom", func(c router.Context) error {
+        c.Response().Header().Set("Content-Type", "text/csv")
+        return c.Bytes(200, []bytes("Column 1, Column 2, Column 3"))
+    })
 
-	log.Fatalln(r.Start(":8000"))
+    log.Fatalln(r.Start(":8000"))
 }
 ```
 
@@ -257,8 +257,8 @@ func main() {
     r.WithPrefix("/blog", func() {
         r.GET("/posts", PostsHandler)
         r.GET("/posts/:id", PostHandler)
-	
-	r.WithPrefix("/pages", func() {
+    
+    r.WithPrefix("/pages", func() {
             r.GET("/about", AboutHandler)
             r.GET("/contact", ContactHandler)
         })
@@ -293,7 +293,7 @@ func main() {
     
     r.WithMiddleware(AdminMiddleware, func() {
         r.GET("/admin/users", UsersHandler)
-	r.GET("/admin/products", ProductsHandler)
+    r.GET("/admin/products", ProductsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -343,7 +343,7 @@ func main() {
     
     r.Group("/blog", []router.Middleware{Middleware1, Middleware2}, func() {
         r.GET("/posts", PostsHandler)
-	r.GET("/posts/:id/comments", CommentsHandler)
+    r.GET("/posts/:id/comments", CommentsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -475,7 +475,7 @@ func main() {
                 return c.HTML(500, "<p>Something went wrong</p>")
             }
             
-	    // No error will raise to the router base handler
+        // No error will raise to the router base handler
             return nil
         }
     })
