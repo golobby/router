@@ -113,12 +113,49 @@ func main() {
    
     // a route with one parameter
     r.GET("/posts/:id", func(c router.Context) error {
-    	return c.Text(200, c.Parameter("id"))
+    	return c.Text(http.StatusOK, c.Parameter("id"))
     })
     
     // a route with multiple parameters
     r.GET("/posts/:id/comments/:cid", func(c router.Context) error {
-    	return c.JSON(200, c.Parameters())
+    	return c.JSON(http.StatusOK, c.Parameters())
+    })
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+### Named Routes
+
+Named routes allow the convenient generation of URLs or redirects for specific routes.
+You may specify a name for a route by chaining the `SetName()` method onto the route definition:
+
+```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
+func main() {
+    r := router.New()
+    
+    r.GET("/", func(c router.Context) error {
+    	return c.Text(http.StatusOK, "I am the home!")
+    }).SetName("home")
+    
+    r.GET("/posts/:id", func(c router.Context) error {
+    	return c.Text(http.StatusOK, "I am a post!")
+    }).SetName("post")
+    
+    r.GET("/links", func(c router.Context) error {
+    	return c.JSON(http.StatusOK, response.M{
+	    "home": c.URL("home", nil),
+	    "post-1": c.URL("post", map[string]string{"id": "1"}),
+	    "post-2": c.URL("post", map[string]string{"id": "2"}),
+	})
     })
     
     log.Fatalln(r.Start(":8000"))
