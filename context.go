@@ -30,9 +30,6 @@ type Context interface {
 	// It returns an empty string if it cannot find any route.
 	URL(route string, parameters map[string]string) string
 
-	// Status sets the HTTP responseWriter status code.
-	Status(status int)
-
 	// Bytes creates and sends a custom HTTP response.
 	Bytes(status int, body []byte) error
 
@@ -104,18 +101,14 @@ func (d *DefaultContext) URL(route string, parameters map[string]string) string 
 	return ""
 }
 
-func (d *DefaultContext) Status(status int) {
-	d.rw.WriteHeader(status)
-}
-
 func (d *DefaultContext) Bytes(status int, body []byte) error {
-	d.Status(status)
+	d.rw.WriteHeader(status)
 	_, err := d.rw.Write(body)
 	return err
 }
 
 func (d *DefaultContext) Empty(status int) error {
-	d.Status(status)
+	d.rw.WriteHeader(status)
 	return nil
 }
 
