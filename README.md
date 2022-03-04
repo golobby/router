@@ -12,6 +12,7 @@ It's built on top of the Go HTTP package and uses radix tree to provide the foll
 * Middleware
 * HTTP Responses (such as JSON, XML, Text, Empty, and Redirect)
 * No footprint!
+* Zero-dependency!
 
 ## Documentation
 ### Required Go Version
