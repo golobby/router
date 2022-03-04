@@ -18,13 +18,13 @@ type Router struct {
 // Define assigns a regular expression pattern to a Route parameter.
 // After the definition, the router only dispatches the related Route if the request URI matches the pattern.
 func (r Router) Define(parameter, pattern string) {
-	r.repository.addParameter(parameter, pattern)
+	r.repository.addParameterPattern(parameter, pattern)
 }
 
 // Map defines a new Route by HTTP method and path and assigns a handler.
 // The path (URI) may contain Route parameters.
-func (r Router) Map(method, path string, handler Handler) {
-	r.repository.addRoute(method, path, handler)
+func (r Router) Map(method, path string, handler Handler) *Route {
+	return r.repository.addRoute(method, path, handler)
 }
 
 // Group creates a group of routes with common attributes.
@@ -81,47 +81,43 @@ func (r Router) Serve(rw http.ResponseWriter, request *http.Request) {
 }
 
 // GET maps a GET Route.
-func (r Router) GET(path string, handler Handler) {
-	r.Map("GET", path, handler)
+func (r Router) GET(path string, handler Handler) *Route {
+	return r.Map("GET", path, handler)
 }
 
 // POST maps a POST Route.
-func (r Router) POST(path string, handler Handler) {
-	r.Map("POST", path, handler)
+func (r Router) POST(path string, handler Handler) *Route {
+	return r.Map("POST", path, handler)
 }
 
 // PUT maps a PUT Route.
-func (r Router) PUT(path string, handler Handler) {
-	r.Map("PUT", path, handler)
+func (r Router) PUT(path string, handler Handler) *Route {
+	return r.Map("PUT", path, handler)
 }
 
 // PATCH maps a PATCH Route.
-func (r Router) PATCH(path string, handler Handler) {
-	r.Map("PATCH", path, handler)
+func (r Router) PATCH(path string, handler Handler) *Route {
+	return r.Map("PATCH", path, handler)
 }
 
 // DELETE maps a DELETE Route.
-func (r Router) DELETE(path string, handler Handler) {
-	r.Map("DELETE", path, handler)
+func (r Router) DELETE(path string, handler Handler) *Route {
+	return r.Map("DELETE", path, handler)
 }
 
 // HEAD maps a HEAD Route.
-func (r Router) HEAD(path string, handler Handler) {
-	r.Map("HEAD", path, handler)
+func (r Router) HEAD(path string, handler Handler) *Route {
+	return r.Map("HEAD", path, handler)
 }
 
 // OPTIONS maps a OPTIONS Route.
-func (r Router) OPTIONS(path string, handler Handler) {
-	r.Map("OPTIONS", path, handler)
+func (r Router) OPTIONS(path string, handler Handler) *Route {
+	return r.Map("OPTIONS", path, handler)
 }
 
 // New creates a new Router instance.
 func New() *Router {
 	repository := newRepository()
 	director := newDirector(repository)
-
-	return &Router{
-		repository: repository,
-		director:   director,
-	}
+	return &Router{repository, director}
 }

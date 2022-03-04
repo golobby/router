@@ -8,7 +8,7 @@ type state struct {
 
 // newState creates a new state instance.
 func newState(prefix string, middlewares []Middleware) *state {
-	return &state{prefix: prefix, middlewares: middlewares}
+	return &state{prefix, middlewares}
 }
 
 // stateStack holds the stack of states (group attributes).

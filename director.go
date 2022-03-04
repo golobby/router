@@ -16,9 +16,11 @@ type director struct {
 
 // ServeHTTP serves HTTP requests and uses other modules to handle them.
 func (d *director) ServeHTTP(rw http.ResponseWriter, request *http.Request) {
-	c := &DefaultContext{}
-	c.SetRequest(request)
-	c.SetResponse(rw)
+	c := &DefaultContext{
+		repository: d.repository,
+		request:    request,
+		rw:         rw,
+	}
 
 	uri, err := url.ParseRequestURI(request.RequestURI)
 	if err != nil {
@@ -26,14 +28,14 @@ func (d *director) ServeHTTP(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	route, parameters, err := d.repository.find(request.Method, uri.Path)
-	if err != nil {
+	route, parameters := d.repository.findByRequest(request.Method, uri.Path)
+	if route == nil {
 		d.serveNotFoundError(c)
 		return
 	}
 
-	c.SetRoute(route)
-	c.SetParameters(parameters)
+	c.route = route
+	c.parameters = parameters
 
 	if err = route.stack[len(route.stack)-1](c); err != nil {
 		d.serveInternalError(c, err)

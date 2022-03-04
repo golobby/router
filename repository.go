@@ -1,9 +1,5 @@
 package router
 
-import (
-	"errors"
-)
-
 // repository holds the radix tree and current stateStack.
 type repository struct {
 	tree  *tree
@@ -11,8 +7,10 @@ type repository struct {
 }
 
 // addRoute adds a new Route to the repository.
-func (r *repository) addRoute(method, path string, handler Handler) {
-	r.tree.add(newRoute(method, r.state.prefix()+path, r.stack(handler)))
+func (r *repository) addRoute(method, path string, handler Handler) *Route {
+	route := newRoute(method, r.state.prefix()+path, r.stack(handler))
+	r.tree.add(route)
+	return route
 }
 
 // stack merges handler and middlewares to create a stack of callables the Route is going to call.
@@ -39,25 +37,23 @@ func (r *repository) updateGroup(prefix string, middleware []Middleware) {
 	r.state.push(prefix, middleware)
 }
 
-// addParameter adds a new Route parameter pattern to the repository.
-func (r *repository) addParameter(name, pattern string) {
+// addParameterPattern adds a new Route parameter pattern to the radix tree.
+func (r *repository) addParameterPattern(name, pattern string) {
 	r.tree.patterns[name] = pattern
 }
 
-// find searches for a Route that matches the given HTTP method and URI.
+// findByRequest searches for a Route that matches the given HTTP method and URI.
 // It returns the Route and its parameters.
-func (r *repository) find(method, uri string) (*Route, map[string]string, error) {
-	if route, parameters := r.tree.find(method, uri); route != nil {
-		return route, parameters, nil
-	}
+func (r *repository) findByRequest(method, uri string) (*Route, map[string]string) {
+	return r.tree.findByRequest(method, uri)
+}
 
-	return nil, nil, errors.New("router: cannot find a Route for the request")
+// findByName searches for a Route with the give name.
+func (r *repository) findByName(name string) *Route {
+	return r.tree.findByName(name)
 }
 
 // newRepository creates a new repository instance.
 func newRepository() *repository {
-	return &repository{
-		state: newStateStack(),
-		tree:  newTree(),
-	}
+	return &repository{newTree(), newStateStack()}
 }
