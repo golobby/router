@@ -217,6 +217,9 @@ func TestRouter_With_Route_Names(t *testing.T) {
 	r.GET("/else/:id", func(c router.Context) error {
 		return c.Text(200, c.URL("other", map[string]string{"id": "13"}))
 	}).SetName("else")
+	r.GET("/name", func(c router.Context) error {
+		return c.Text(200, c.Route().Name())
+	}).SetName("name")
 
 	rw := newResponse()
 	r.Serve(rw, newRequest("GET", "/"))
@@ -237,6 +240,11 @@ func TestRouter_With_Route_Names(t *testing.T) {
 	r.Serve(rw, newRequest("GET", "/else/1"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/name"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "name", rw.stringBody())
 }
 
 func TestRouter_WithPrefix(t *testing.T) {
