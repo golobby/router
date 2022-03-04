@@ -76,9 +76,9 @@ func (t *tree) searchByParts(parent *node, parts []string, position int, paramet
 
 			if isLeaf {
 				return child
-			} else {
-				return t.searchByParts(child, parts, position+1, parameters)
 			}
+
+			return t.searchByParts(child, parts, position+1, parameters)
 		}
 	}
 
