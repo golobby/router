@@ -67,21 +67,27 @@ type DefaultContext struct {
 	parameters map[string]string
 }
 
+// Route returns the dispatched Route
 func (d *DefaultContext) Route() *Route {
 	return d.route
 }
 
+// Request returns the HTTP request.
 func (d *DefaultContext) Request() *http.Request {
 	return d.request
 }
+
+// Response return the HTTP responseWriter.
 func (d *DefaultContext) Response() http.ResponseWriter {
 	return d.rw
 }
 
+// Parameters returns Route parameters.
 func (d *DefaultContext) Parameters() map[string]string {
 	return d.parameters
 }
 
+// Parameter returns a router parameter by name.
 func (d *DefaultContext) Parameter(name string) string {
 	if value, exist := d.parameters[name]; exist {
 		return value
@@ -89,11 +95,14 @@ func (d *DefaultContext) Parameter(name string) string {
 	return ""
 }
 
+// HasParameter checks if router parameter exists.
 func (d *DefaultContext) HasParameter(name string) bool {
 	_, exist := d.parameters[name]
 	return exist
 }
 
+// URL generates a URL for given route name and actual parameters.
+// It returns an empty string if it cannot find any route.
 func (d *DefaultContext) URL(route string, parameters map[string]string) string {
 	if route := d.repository.findByName(route); route != nil {
 		return route.URL(parameters)
@@ -101,32 +110,38 @@ func (d *DefaultContext) URL(route string, parameters map[string]string) string 
 	return ""
 }
 
+// Bytes creates and sends a custom HTTP response.
 func (d *DefaultContext) Bytes(status int, body []byte) error {
 	d.rw.WriteHeader(status)
 	_, err := d.rw.Write(body)
 	return err
 }
 
+// Empty creates and sends an HTTP empty response.
 func (d *DefaultContext) Empty(status int) error {
 	d.rw.WriteHeader(status)
 	return nil
 }
 
+// Redirect creates and sends an HTTP redirection response.
 func (d *DefaultContext) Redirect(status int, url string) error {
 	http.Redirect(d.Response(), d.Request(), url, status)
 	return nil
 }
 
+// Text creates and sends an HTTP text response.
 func (d *DefaultContext) Text(status int, body string) error {
 	d.Response().Header().Set("Content-Type", "text/plain")
 	return d.Bytes(status, []byte(body))
 }
 
+// HTML creates and sends an HTTP HTML response.
 func (d *DefaultContext) HTML(status int, body string) error {
 	d.Response().Header().Set("Content-Type", "text/html")
 	return d.Bytes(status, []byte(body))
 }
 
+// JSON creates and sends an HTTP JSON response.
 func (d *DefaultContext) JSON(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/json")
 	bytes, err := json.Marshal(body)
@@ -136,6 +151,7 @@ func (d *DefaultContext) JSON(status int, body interface{}) error {
 	return d.Bytes(status, bytes)
 }
 
+// PrettyJSON creates and sends an HTTP JSON (with indents) response.
 func (d *DefaultContext) PrettyJSON(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/json")
 	bytes, err := json.MarshalIndent(body, "", "  ")
@@ -145,6 +161,7 @@ func (d *DefaultContext) PrettyJSON(status int, body interface{}) error {
 	return d.Bytes(status, bytes)
 }
 
+// XML creates and sends an HTTP XML response.
 func (d *DefaultContext) XML(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/xml")
 	bytes, err := xml.MarshalIndent(body, "", "")
@@ -154,6 +171,7 @@ func (d *DefaultContext) XML(status int, body interface{}) error {
 	return d.Bytes(status, bytes)
 }
 
+// PrettyXML creates and sends an HTTP XML (with indents) response.
 func (d *DefaultContext) PrettyXML(status int, body interface{}) error {
 	d.Response().Header().Set("Content-Type", "application/xml")
 	bytes, err := xml.MarshalIndent(body, "", "  ")
