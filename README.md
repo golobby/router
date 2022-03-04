@@ -42,9 +42,10 @@ func main() {
     
     r.GET("/", func(c router.Context) error {
         // c.Request() is original http.Request
-    // c.Response() is original http.ResponseWriter
+        // c.Response() is original http.ResponseWriter
         return c.Text(http.StatusOK, "Hello from GoLobby Router!")
     })
+    
     r.PUT("/products/:id", func(c router.Context) error {
         return c.Text(http.StatusOK, "Update product with ID: "+c.Parameter("id"))
     })
@@ -153,13 +154,13 @@ func main() {
     
     r.GET("/links", func(c router.Context) error {
         return c.JSON(http.StatusOK, response.M{
-        // URL: /
-        "home": c.URL("home", nil),
-        // URL: /posts/1
-        "post-1": c.URL("post", map[string]string{"id": "1"}),
-        // URL: /posts/2
-        "post-2": c.URL("post", map[string]string{"id": "2"}),
-    })
+            // "/"
+            "home": c.URL("home", nil),
+            // "/posts/1"
+            "post-1": c.URL("post", map[string]string{"id": "1"}),
+            // "/posts/2"
+            "post-2": c.URL("post", map[string]string{"id": "2"}),
+        })
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -168,7 +169,7 @@ func main() {
 
 ### Responses
 
-The router comes with `Empty`, `Redirect`, `Text`, `HTML`, `JSON`, `PrettyJSON`, `XML`, and `PrettyXML` responses out of the box.
+The router comes with `Empty`, `Redirect`, `Text`, `HTML`, `JSON`, `PrettyJSON`, `XML`, `PrettyXML`, and `Bytes` responses out of the box.
 The examples below demonstrate how to use built-in and custom responses.
 
 ```go
@@ -293,7 +294,7 @@ func main() {
     
     r.WithMiddleware(AdminMiddleware, func() {
         r.GET("/admin/users", UsersHandler)
-    r.GET("/admin/products", ProductsHandler)
+        r.GET("/admin/products", ProductsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -343,7 +344,7 @@ func main() {
     
     r.Group("/blog", []router.Middleware{Middleware1, Middleware2}, func() {
         r.GET("/posts", PostsHandler)
-    r.GET("/posts/:id/comments", CommentsHandler)
+        r.GET("/posts/:id/comments", CommentsHandler)
     })
     
     log.Fatalln(r.Start(":8000"))
@@ -475,7 +476,7 @@ func main() {
                 return c.HTML(500, "<p>Something went wrong</p>")
             }
             
-        // No error will raise to the router base handler
+            // No error will raise to the router base handler
             return nil
         }
     })
