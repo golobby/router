@@ -12,6 +12,7 @@ It's built on top of the Go HTTP package and uses radix tree to provide the foll
 * Middleware
 * HTTP Responses (such as JSON, XML, Text, Empty, and Redirect)
 * No footprint!
+* Zero-dependency!
 
 ## Documentation
 ### Required Go Version
@@ -154,12 +155,9 @@ func main() {
     
     r.GET("/links", func(c router.Context) error {
         return c.JSON(http.StatusOK, response.M{
-            // "/"
-            "home": c.URL("home", nil),
-            // "/posts/1"
-            "post-1": c.URL("post", map[string]string{"id": "1"}),
-            // "/posts/2"
-            "post-2": c.URL("post", map[string]string{"id": "2"}),
+            "home": c.URL("home", nil), // "/"
+            "post-1": c.URL("post", map[string]string{"id": "1"}), // "/posts/1"
+            "post-2": c.URL("post", map[string]string{"id": "2"}), // "/posts/2"
         })
     })
     
@@ -256,12 +254,11 @@ func main() {
     r := router.New()
     
     r.WithPrefix("/blog", func() {
-        r.GET("/posts", PostsHandler)
-        r.GET("/posts/:id", PostHandler)
-    
-    r.WithPrefix("/pages", func() {
-            r.GET("/about", AboutHandler)
-            r.GET("/contact", ContactHandler)
+        r.GET("/posts", PostsHandler)    // "/blog/posts"
+        r.GET("/posts/:id", PostHandler) // "/blog/posts/:id"
+        r.WithPrefix("/pages", func() {
+            r.GET("/about", AboutHandler)     // "/blog/pages/about"
+            r.GET("/contact", ContactHandler) // "/blog/pages/contact"
         })
     })
     
@@ -433,6 +430,7 @@ import (
 func main() {
     r := router.New()
     
+    // Custom (HTML) Not Found Handler
     r.SetNotFoundHandler(func(c router.Context) error {
         return c.HTML(404, "<p>404 Not Found</p>")
     })
