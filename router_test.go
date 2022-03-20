@@ -191,6 +191,82 @@ func TestRouter_With_Route_Parameters(t *testing.T) {
 	assert.Equal(t, "", rw.stringBody())
 }
 
+func TestRouter_With_Both_Static_Part_And_Parameter(t *testing.T) {
+	r := router.New()
+
+	r.GET("/", func(c router.Context) error {
+		return c.Text(200, "home")
+	})
+	r.GET("/page", func(c router.Context) error {
+		return c.Text(200, "page")
+	})
+	r.GET("/:id", func(c router.Context) error {
+		return c.Text(200, "id")
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "home", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/page"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "page", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/13"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "id", rw.stringBody())
+}
+
+func TestRouter_With_Wildcard(t *testing.T) {
+	r := router.New()
+
+	r.GET("/", func(c router.Context) error {
+		return c.Text(200, "home")
+	})
+	r.GET("/page", func(c router.Context) error {
+		return c.Text(200, "page")
+	})
+	r.GET("/files/*", func(c router.Context) error {
+		return c.Text(200, "wildcard-files")
+	})
+	r.GET("/*", func(c router.Context) error {
+		return c.Text(200, "wildcard-all")
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "home", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/page"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "page", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/files/abc"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "wildcard-files", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/files/abc/123"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "wildcard-files", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/abc"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "wildcard-all", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/abc/123"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "wildcard-all", rw.stringBody())
+}
+
 func TestRouter_With_Context_Parameters(t *testing.T) {
 	r := router.New()
 	r.GET("/", func(c router.Context) error {

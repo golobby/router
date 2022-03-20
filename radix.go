@@ -69,12 +69,15 @@ func (t *tree) searchByParts(parent *node, parts []string, position int, paramet
 
 	for _, child := range parent.Children {
 		delete(parameters, position)
-		if ok, key, value := t.match(child.content, parts[position]); ok {
-			if key != "" {
+
+		isWildcard := child.content == "*"
+
+		if ok, name, value := t.match(child.content, parts[position]); ok {
+			if name != "" {
 				parameters[position] = value
 			}
 
-			if isLeaf {
+			if isLeaf || isWildcard {
 				return child
 			}
 
@@ -128,6 +131,7 @@ func (t *tree) insert(parent, node *node, parts []string, index int) {
 }
 
 // match compares a request URI part with a route path part and returns the boolean result.
+// It also returns route parameter name and its real value if exist
 func (t *tree) match(routePart, UriPart string) (bool, string, string) {
 	if strings.HasPrefix(routePart, ":") {
 		name := routePart[1:]
@@ -139,11 +143,14 @@ func (t *tree) match(routePart, UriPart string) (bool, string, string) {
 		} else {
 			return true, name, UriPart
 		}
+	} else if routePart == "*" {
+		return true, "", ""
 	}
+
 	return routePart == UriPart, "", ""
 }
 
 // newTree creates a new tree instance.
 func newTree() *tree {
-	return &tree{head: newNode(nil, "*"), patterns: map[string]string{}}
+	return &tree{head: newNode(nil, ""), patterns: map[string]string{}}
 }
