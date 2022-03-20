@@ -9,8 +9,10 @@ GoLobby Router is a lightweight yet powerful HTTP router for Go projects.
 It's built on top of the Go HTTP package and uses radix tree to provide the following features:
 * Routing based on HTTP method and URI
 * Route parameters and parameter patterns
+* Route wildcards
 * Middleware
-* HTTP Responses (such as JSON, XML, Text, Empty, and Redirect)
+* HTTP Responses (such as JSON, XML, Text, Empty, File, and Redirect)
+* Static file serving
 * No footprint!
 * Zero-dependency!
 
@@ -127,6 +129,91 @@ func main() {
 }
 ```
 
+### Wildcard Routes
+
+Wildcard routes match any URI with the specified prefix.
+The following example shows how it works.
+
+```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
+func main() {
+    r := router.New()
+    
+    // Exception routes must come first.
+    r.GET("/pages/contact", ContactHandler)
+    
+    r.GET("/pages/*", PagesHandler)
+    // It matches:
+    // - /pages/
+    // - /pages/about
+    // - /pages/about/us
+    // - /pages/help
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+### Serving Static Files
+
+The `FileHandler` and `FileHandlerWithStripper` handlers are provided to serve static files directly.
+The examples below demonstrate how to use them.
+
+```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
+func main() {
+    r := router.New()
+    
+    r.GET("/api", YourApiHandler)
+    
+    r.GET("/*", router.FileHandler("./files"))
+    // example.com/            ==> ./files/index.html
+    // example.com/photo.jpg   ==> ./files/photo.jpg
+    // example.com/notes/1.txt ==> ./files/notes/1.txt
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
+You might serve static files with different URI.
+In this case, you must strip the extra URI prefix like this example.
+
+```go
+package main
+
+import (
+    "github.com/golobby/router"
+    "log"
+    "net/http"
+)
+
+func main() {
+    r := router.New()
+    
+    r.GET("/api", YourApiHandler)
+    
+    r.GET("/files/*", router.FileHandlerWithStripper("./files", "/files/"))
+    // example.com/files/            ==> ./files/index.html
+    // example.com/files/photo.jpg   ==> ./files/photo.jpg
+    // example.com/files/notes/1.txt ==> ./files/notes/1.txt
+    
+    log.Fatalln(r.Start(":8000"))
+}
+```
+
 ### Named Routes
 
 Named routes allow the convenient generation of URLs or redirects for specific routes.
@@ -221,6 +308,10 @@ func main() {
 
     r.GET("/bytes", func(c router.Context) error {
         return c.Bytes(200, []bytes("Some bytes!"))
+    })
+
+    r.GET("/file", func(c router.Context) error {
+		return c.File(200, "text/plain", "text.txt")
     })
 
     r.GET("/custom", func(c router.Context) error {
