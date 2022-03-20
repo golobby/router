@@ -6,6 +6,7 @@ import (
 	"github.com/golobby/router/pkg/response"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/url"
 	"strconv"
 	"testing"
 	"time"
@@ -50,6 +51,7 @@ func newRequest(method, path string) *http.Request {
 	return &http.Request{
 		Method:     method,
 		RequestURI: path,
+		URL:        &url.URL{Path: path},
 	}
 }
 
@@ -296,6 +298,37 @@ func TestRouter_With_File_Response(t *testing.T) {
 	rw = newResponse()
 	r.Serve(rw, newRequest("GET", "/404"))
 	assert.Equal(t, 500, rw.status)
+}
+
+func TestRouter_With_Serving_Static_Files(t *testing.T) {
+	r := router.New()
+	r.GET("/files/notes/*", router.FileHandlerWithStripper("assets/notes", "/files/notes/"))
+	r.GET("/*", router.FileHandler("assets"))
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/files/notes/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "<p>This is notes index.</p>", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/files/notes/note1.txt"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "This is note 1.", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "<p>This is root index.</p>", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/text.txt"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "This is a text file.", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/notes/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "<p>This is notes index.</p>", rw.stringBody())
 }
 
 func TestRouter_With_Route_Names(t *testing.T) {
