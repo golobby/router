@@ -279,6 +279,18 @@ func TestRouter_With_Context_Parameters(t *testing.T) {
 	assert.Equal(t, "GET /", rw.stringBody())
 }
 
+func TestRouter_With_File_Response(t *testing.T) {
+	r := router.New()
+	r.GET("/", func(c router.Context) error {
+		return c.File(200, "text/plain", "assets/text.txt")
+	})
+
+	rw := newResponse()
+	r.Serve(rw, newRequest("GET", "/"))
+	assert.Equal(t, 200, rw.status)
+	assert.Equal(t, "This is a text file.", rw.stringBody())
+}
+
 func TestRouter_With_Route_Names(t *testing.T) {
 	r := router.New()
 	r.GET("/", func(c router.Context) error {

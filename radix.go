@@ -150,7 +150,7 @@ func (t *tree) match(routePart, UriPart string) (bool, string, string) {
 	return routePart == UriPart, "", ""
 }
 
-// newTree creates a new tree instance.
+// newTree creates a new radix tree instance.
 func newTree() *tree {
 	return &tree{head: newNode(nil, ""), patterns: map[string]string{}}
 }

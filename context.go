@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"encoding/xml"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -56,6 +57,9 @@ type Context interface {
 
 	// PrettyXML creates and sends an HTTP XML (with indents) response.
 	PrettyXML(status int, body interface{}) error
+
+	// File creates and sends an HTTP response that contains a file.
+	File(status int, contentType, path string) error
 }
 
 // DefaultContext is the default implementation of Context interface.
@@ -179,4 +183,14 @@ func (d *DefaultContext) PrettyXML(status int, body interface{}) error {
 		return err
 	}
 	return d.Bytes(status, bytes)
+}
+
+// File creates and sends an HTTP response that contains a file.
+func (d *DefaultContext) File(status int, contentType, path string) error {
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	d.Response().Header().Set("Content-Type", contentType)
+	return d.Bytes(status, content)
 }
