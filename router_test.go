@@ -284,11 +284,18 @@ func TestRouter_With_File_Response(t *testing.T) {
 	r.GET("/", func(c router.Context) error {
 		return c.File(200, "text/plain", "assets/text.txt")
 	})
+	r.GET("/404", func(c router.Context) error {
+		return c.File(200, "text/plain", "assets/no-file")
+	})
 
 	rw := newResponse()
 	r.Serve(rw, newRequest("GET", "/"))
 	assert.Equal(t, 200, rw.status)
 	assert.Equal(t, "This is a text file.", rw.stringBody())
+
+	rw = newResponse()
+	r.Serve(rw, newRequest("GET", "/404"))
+	assert.Equal(t, 500, rw.status)
 }
 
 func TestRouter_With_Route_Names(t *testing.T) {
