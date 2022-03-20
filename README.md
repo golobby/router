@@ -311,7 +311,7 @@ func main() {
     })
 
     r.GET("/file", func(c router.Context) error {
-		return c.File(200, "text/plain", "text.txt")
+	return c.File(200, "text/plain", "text.txt")
     })
 
     r.GET("/custom", func(c router.Context) error {
