@@ -91,11 +91,17 @@ func TestRouter_With_Different_HTTP_Methods(t *testing.T) {
 	r.HEAD("/", handler)
 	r.OPTIONS("/", handler)
 	r.Map("CUSTOM", "/", handler)
+	r.Any("/any", handler)
 
 	methods := []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "CUSTOM"}
 	for _, m := range methods {
 		rw := newResponse()
 		r.Serve(rw, newRequest(m, "/"))
+		assert.Equal(t, 200, rw.status)
+		assert.Equal(t, m, rw.stringBody())
+
+		rw = newResponse()
+		r.Serve(rw, newRequest(m, "/any"))
 		assert.Equal(t, 200, rw.status)
 		assert.Equal(t, m, rw.stringBody())
 	}

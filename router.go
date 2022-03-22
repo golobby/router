@@ -86,6 +86,11 @@ func (r Router) Serve(rw http.ResponseWriter, request *http.Request) {
 	r.director.ServeHTTP(rw, request)
 }
 
+// Any maps a method-agnostic Route.
+func (r Router) Any(path string, handler Handler) *Route {
+	return r.Map(":__METHOD__", path, handler)
+}
+
 // GET maps a GET Route.
 func (r Router) GET(path string, handler Handler) *Route {
 	return r.Map("GET", path, handler)
