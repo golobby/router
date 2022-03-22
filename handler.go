@@ -9,9 +9,9 @@ import (
 // When the router finds a Route for the incoming HTTP request, it calls the Route's handler.
 type Handler func(c Context) error
 
-// FilesHandler is a special handler for serving static files.
+// filesHandler creates a special handler for serving static files.
 // It returns files stored in the given root directory that matches the stripped request URI (path).
-func FilesHandler(path, directory string) Handler {
+func filesHandler(path, directory string) Handler {
 	return func(c Context) error {
 		fs := http.FileServer(http.Dir(directory))
 		h := http.StripPrefix(strings.TrimRight(path, "*"), fs)

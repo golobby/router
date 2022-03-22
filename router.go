@@ -24,7 +24,7 @@ func (r Router) Define(parameter, pattern string) {
 // Files defines a new static file server on the given path (URI) for the given directory root.
 // The path (URI) must end with `*` to cover all the existing files and subdirectories.
 func (r Router) Files(path, directory string) *Route {
-	return r.GET(path, FilesHandler(path, directory))
+	return r.GET(path, filesHandler(path, directory))
 }
 
 // Map defines a new Route by HTTP method and path and assigns a handler.
