@@ -57,9 +57,11 @@ func main() {
 ```
 
 ### HTTP Methods
-You can use the `Map()` method to declare routes. It gets HTTP methods and paths (URIs).
+You can use the `Map()` method to declare routes.
+It gets HTTP methods and paths (URIs).
 There are also some methods available for the most used HTTP methods.
 These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`.
+The `Any()` method defines routes that handles any HTTP method.
 
 ```go
 package main
@@ -85,9 +87,11 @@ func main() {
     r.HEAD("/", Handler)
     r.OPTIONS("/", Handler)
     
+    r.Any("/page", Handler)
+    
     r.Map("GET", "/", Handler)
     r.Map("CUSTOM", "/", Handler)
-    
+        
     log.Fatalln(r.Start(":8000"))
 }
 ```
