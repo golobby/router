@@ -175,6 +175,7 @@ func main() {
     // Other routes with the same pattern should come first.
     r.GET("/api", YourApiHandler)
     
+    // The path (URI) must end with `*`.
     r.Files("/*", "./files")
     // example.com/            ==> ./files/index.html
     // example.com/photo.jpg   ==> ./files/photo.jpg
