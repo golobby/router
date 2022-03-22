@@ -28,7 +28,6 @@ go get github.com/golobby/router
 ```
 
 ### Quick Start
-
 The following example demonstrates a simple example of using the router package.
 
 ```go
@@ -58,7 +57,6 @@ func main() {
 ```
 
 ### HTTP Methods
-
 You can use the `Map()` method to declare routes. It gets HTTP methods and paths (URIs).
 There are also some methods available for the most used HTTP methods.
 These methods are `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS`.
@@ -95,7 +93,6 @@ func main() {
 ```
 
 ### Route Parameters
-
 To specify route parameters, prepend a colon like `:id`.
 In default, parameters could be anything but you can determine a regex pattern using the `Define()` method. Of course, regex patterns slow down your application, and it is recommended not to use them if possible.
 To catch and check route parameters in your handlers, you'll have the `Parameters()`, `Parameter()`, and `HasParameter()` methods.
@@ -130,7 +127,6 @@ func main() {
 ```
 
 ### Wildcard Routes
-
 Wildcard routes match any URI with the specified prefix.
 The following example shows how it works.
 
@@ -161,7 +157,6 @@ func main() {
 ```
 
 ### Serving Static Files
-
 The `FileHandler` and `FileHandlerWithStripper` handlers are provided to serve static files directly.
 The examples below demonstrate how to use them.
 
@@ -215,7 +210,6 @@ func main() {
 ```
 
 ### Named Routes
-
 Named routes allow the convenient generation of URLs or redirects for specific routes.
 You may specify a name for a route by chaining the `SetName()` method onto the route definition:
 
@@ -253,7 +247,6 @@ func main() {
 ```
 
 ### Responses
-
 The router comes with `Empty`, `Redirect`, `Text`, `HTML`, `JSON`, `PrettyJSON`, `XML`, `PrettyXML`, and `Bytes` responses out of the box.
 The examples below demonstrate how to use built-in and custom responses.
 
@@ -324,12 +317,10 @@ func main() {
 ```
 
 ### Groups
-
 You may put routes with similar attributes in groups.
 Currently, prefix and middleware attributes are supported.
 
 #### Group by prefix
-
 The example below demonstrates how to group routes with the same prefix.
 
 ```go
@@ -358,7 +349,6 @@ func main() {
 ```
 
 #### Group by middleware
-
 The example below demonstrates how to group routes with the same middleware.
 
 ```go
@@ -390,7 +380,6 @@ func main() {
 ```
 
 #### Group by middlewares
-
 The example below demonstrates how to group routes with the same middlewares.
 
 ```go
@@ -415,7 +404,6 @@ func main() {
 ```
 
 #### Group by multiple attributes
-
 The `group()` method helps you create a group of routes with the same prefix and middlewares.
 
 ```go
@@ -440,12 +428,10 @@ func main() {
 ```
 
 ### Basic Attributes
-
 Your application might need a base prefix or global middlewares.
 In this case, you can set up these base attributes before defining routes.
 
 #### Base prefix
-
 The following example shows how to set a base prefix for all routes.
 
 ```go
@@ -471,7 +457,6 @@ func main() {
 ```
 
 #### Base middlewares
-
 The following example shows how to set a base middlewares for all routes.
 
 ```go
@@ -500,7 +485,6 @@ func main() {
 ```
 
 ### 404 Handler
-
 In default, the router returns the following HTTP 404 response when a requested URI doesn't match any route.
 
 ```json
@@ -533,7 +517,6 @@ func main() {
 ```
 
 ### Error Handling
-
 Your handlers might return an error while processing the HTTP request.
 This error can be produced by your application logic or failure in the HTTP response.
 By default, the router logs it using Golang's built-in logger into the standard output and returns the HTTP 500 response below.
