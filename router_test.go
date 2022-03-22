@@ -302,8 +302,8 @@ func TestRouter_With_File_Response(t *testing.T) {
 
 func TestRouter_With_Serving_Static_Files(t *testing.T) {
 	r := router.New()
-	r.GET("/files/notes/*", router.FileHandlerWithStripper("assets/notes", "/files/notes/"))
-	r.GET("/*", router.FileHandler("assets"))
+	r.Files("/files/notes/*", "assets/notes")
+	r.Files("/*", "assets")
 
 	rw := newResponse()
 	r.Serve(rw, newRequest("GET", "/files/notes/"))
