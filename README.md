@@ -142,7 +142,7 @@ import (
 func main() {
     r := router.New()
     
-    // Exception routes must come first.
+    // Other routes with the same pattern should come first.
     r.GET("/pages/contact", ContactHandler)
     
     r.GET("/pages/*", PagesHandler)
