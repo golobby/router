@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/golobby/router/?status.svg)](https://godoc.org/github.com/golobby/router)
+[![Go Reference](https://pkg.go.dev/badge/github.com/golobby/router.svg)](https://pkg.go.dev/github.com/golobby/router)
 [![CI](https://github.com/golobby/router/actions/workflows/ci.yml/badge.svg)](https://github.com/golobby/router/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/golobby/router/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/golobby/router/actions/workflows/codeql-analysis.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/golobby/router)](https://goreportcard.com/report/github.com/golobby/router)
