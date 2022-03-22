@@ -81,7 +81,9 @@ func (t *tree) searchByParts(parent *node, parts []string, position int, paramet
 				return child
 			}
 
-			return t.searchByParts(child, parts, position+1, parameters)
+			if node := t.searchByParts(child, parts, position+1, parameters); node != nil {
+				return node
+			}
 		}
 	}
 
@@ -106,16 +108,16 @@ func (t *tree) searchByName(node *node, name string) *node {
 }
 
 // insert adds a new route to the radix tree by recursive traversing.
-func (t *tree) insert(parent, node *node, parts []string, index int) {
-	isLeaf := index == len(parts)-1
+func (t *tree) insert(parent, node *node, parts []string, position int) {
+	isLeaf := position == len(parts)-1
 
 	for i, child := range parent.Children {
-		if child.content == parts[index] {
+		if child.content == parts[position] {
 			if isLeaf {
 				node.Children = parent.Children[i].Children
 				parent.Children[i] = node
 			} else {
-				t.insert(child, node, parts, index+1)
+				t.insert(child, node, parts, position+1)
 			}
 			return
 		}
@@ -124,9 +126,9 @@ func (t *tree) insert(parent, node *node, parts []string, index int) {
 	if isLeaf {
 		parent.Children = append(parent.Children, node)
 	} else {
-		newNode := newNode(nil, parts[index])
+		newNode := newNode(nil, parts[position])
 		parent.Children = append(parent.Children, newNode)
-		t.insert(newNode, node, parts, index+1)
+		t.insert(newNode, node, parts, position+1)
 	}
 }
 
