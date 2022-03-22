@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/golobby/router/badge.svg?r=2)](https://coveralls.io/github/golobby/router?branch=master)
 
 # GoLobby Router
-GoLobby Router is a lightweight yet powerful HTTP router for Go projects.
+GoLobby Router is a lightweight yet powerful HTTP router for Go programming language.
 It's built on top of the Go HTTP package and uses radix tree to provide the following features:
 * Routing based on HTTP method and URI
 * Route parameters and parameter patterns
