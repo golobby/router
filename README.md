@@ -157,8 +157,8 @@ func main() {
 ```
 
 ### Serving Static Files
-The `FileHandler` and `FileHandlerWithStripper` handlers are provided to serve static files directly.
-The examples below demonstrate how to use them.
+The `Files` method is provided to serve static files directly.
+The example below demonstrate how to use it.
 
 ```go
 package main
@@ -172,38 +172,13 @@ import (
 func main() {
     r := router.New()
     
+    // Other routes with the same pattern should come first.
     r.GET("/api", YourApiHandler)
     
-    r.GET("/*", router.FileHandler("./files"))
+    r.Files("/*", "./files")
     // example.com/            ==> ./files/index.html
     // example.com/photo.jpg   ==> ./files/photo.jpg
     // example.com/notes/1.txt ==> ./files/notes/1.txt
-    
-    log.Fatalln(r.Start(":8000"))
-}
-```
-
-You might serve static files with different URI.
-In this case, you must strip the extra URI prefix like this example.
-
-```go
-package main
-
-import (
-    "github.com/golobby/router"
-    "log"
-    "net/http"
-)
-
-func main() {
-    r := router.New()
-    
-    r.GET("/api", YourApiHandler)
-    
-    r.GET("/files/*", router.FileHandlerWithStripper("./files", "/files/"))
-    // example.com/files/            ==> ./files/index.html
-    // example.com/files/photo.jpg   ==> ./files/photo.jpg
-    // example.com/files/notes/1.txt ==> ./files/notes/1.txt
     
     log.Fatalln(r.Start(":8000"))
 }
